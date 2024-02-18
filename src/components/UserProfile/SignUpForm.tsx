@@ -3,35 +3,39 @@ import './SignUpForm.css';
 import { hashData } from "../../util/security";
 import { signUp } from "../../service/users";
 
-export default function SignUpForm() {
+export type SignUpFormInput = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    confirmPassword?: string
+}
 
-    const [signUpInput, setSignUpInput] = useState({
+type SignUpFormSubmit = SignUpFormInput & {
+    salt?: string,
+    iterations?: number
+}
+
+export const SignUpForm = (): React.JSX.Element => {
+
+    const [signUpInput, setSignUpInput] = useState<SignUpFormInput>({
         firstName: '',
         lastName: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
-    const [signupSucc, setSignupSucc] = useState(false);
+    const [signupSucc, setSignupSucc] = useState<boolean>(false);
 
-    const handleInputChange = (evt) => {
+    const handleInputChange = (evt: React.FormEvent<HTMLInputElement>): void => {
         setSignUpInput({
             ...signUpInput,
-            [evt.target.name]: evt.target.value
+            [evt.currentTarget.name]: evt.currentTarget.value
         });
-        setDisable(checkPassword());
-    }
-
-    const checkPassword = () => {
-        const currInput = signUpInput;
-        if (!currInput.password || !currInput.confirmPassword || currInput.password !== currInput.confirmPassword) {
-            return true;
-        }
-        return false;
     }
 
     function hashPassword() {
-        var currForm = signUpInput;
+        var currForm: SignUpFormSubmit = signUpInput;
         if (currForm.password) {
             console.log(currForm.password)
             var hash = hashData(currForm.password);
@@ -41,7 +45,7 @@ export default function SignUpForm() {
         }  
     }
 
-    const handleSubmit = async (evt) => {
+    const handleSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
 
         try {
             evt.preventDefault();
@@ -142,7 +146,7 @@ export default function SignUpForm() {
                         : null
                     }
 
-                    <button className="btn btn-submit" disable={disabled ? "disabled" : null}>Sign Up</button>
+                    <button className="btn btn-submit">Sign Up</button>
                 </form>
             </div>
     )
