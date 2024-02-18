@@ -2,13 +2,18 @@ import { useState } from "react";
 import { getLoginDetails, loginUser } from "../../../service/users";
 import { hashDataWithSaltRounds, storeToken } from "../../../util/security";
 import { useNavigate } from "react-router";
+import { LoginUserStore } from "./LoginUserStore";
 
 export type LoginDetails = {
     email: string,
     password: string
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+    userStore: LoginUserStore
+}
+
+export const LoginForm = ({ userStore }: LoginFormProps): React.JSX.Element => {
     const navigate = useNavigate();
 
     const [loginInput, setLoginInput] = useState({
@@ -42,7 +47,7 @@ export function LoginForm() {
             const token = await loginUser(loginData);
             // store token in localStorage
             storeToken(token);
-            // setLogin(true);
+            userStore.setLogin(true);
 
             navigate("/");
 

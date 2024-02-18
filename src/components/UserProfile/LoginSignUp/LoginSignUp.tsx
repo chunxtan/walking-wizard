@@ -1,8 +1,13 @@
 import { LoginForm } from "./LoginForm";
 import { SignUpForm } from "./SignUpForm";
 import { useState } from "react";
+import { LoginUserStore } from "./LoginUserStore"; 
 
-export function LoginSignUp() {
+type LoginSignUpProps = {
+    userStore: LoginUserStore
+}
+
+export const LoginSignUp = ({ userStore }: LoginSignUpProps): React.JSX.Element => {
     const [activeTab, setActiveTab] = useState("login");
 
     const handleTabChange = (tab: string): void => {
@@ -14,7 +19,7 @@ export function LoginSignUp() {
         <div role="tablist" className="tabs tabs-bordered">
             <input type="radio" onChange={() => handleTabChange("login")} checked={activeTab === "login"} name="my_tabs_1" role="tab" className="tab" aria-label="Login" />
             <div role="tabpanel" className="tab-content p-10">
-                <LoginForm />
+                <LoginForm userStore={userStore} />
             </div>
 
             <input type="radio" onChange={() => handleTabChange("signup")} checked={activeTab === "signup"} name="my_tabs_1" role="tab" className="tab" aria-label="Sign Up"  />
