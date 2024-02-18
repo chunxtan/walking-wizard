@@ -1,18 +1,20 @@
-
 import './App.css'
 import { Routes, Route } from "react-router-dom";
-import { SignUpForm } from "./components/UserProfile/SignUpForm"
+import { SignUpForm } from "./components/UserProfile/SignUpForm/SignUpForm"
+import { NavBar } from './components/NavBar/NavBar.tsx';
 
 
 function App() {
 
   return (
-    <main>
-
-      <Routes>
-        <Route path="/signup" element={<SignUpForm />} />
-      </Routes>
-    </main>
+    <>
+      <main>
+        <NavBar />
+        <Routes>
+          <Route path="/signup" element={<SignUpForm />} />
+        </Routes>
+      </main>
+    </>
   )
 }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './SignUpForm.css';
-import { hashData } from "../../util/security";
-import { signUp } from "../../service/users";
+import { hashData } from "../../../util/security";
+import { signUp } from "../../../service/users";
 
 export type SignUpFormInput = {
     firstName: string,

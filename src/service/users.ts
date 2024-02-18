@@ -1,6 +1,6 @@
 import * as usersAPI from "../api/users";
 // import { getToken, removeToken } from "../util/security";
-import { SignUpFormInput } from "../components/UserProfile/SignUpForm"
+import { SignUpFormInput } from "../components/UserProfile/SignUpForm/SignUpForm"
 
 export async function signUp(userData: SignUpFormInput) {
     // Delegate the network request code to the users-api.js API module

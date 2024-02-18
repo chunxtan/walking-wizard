@@ -1,4 +1,4 @@
-import { SignUpFormInput } from "../components/UserProfile/SignUpForm"
+import { SignUpFormInput } from "../components/UserProfile/SignUpForm/SignUpForm"
 
 
 // This is the base path of the Express route we'll define
