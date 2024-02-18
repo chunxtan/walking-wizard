@@ -2,7 +2,7 @@ import { SignUpFormInput } from "../components/UserProfile/SignUpForm"
 
 
 // This is the base path of the Express route we'll define
-const BASE_URL = "http://localhost:3000/";
+const BASE_URL = "http://localhost:3000/users";
 
 type UserDao = {
   firstName: string,
