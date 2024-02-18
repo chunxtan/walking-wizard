@@ -1,6 +1,6 @@
 import './App.css'
 import { Routes, Route } from "react-router-dom";
-import { SignUpForm } from "./components/UserProfile/SignUpForm/SignUpForm"
+import { LoginSignUp } from "./components/UserProfile/LoginSignUp/LoginSignUp.tsx"
 import { NavBar } from './components/NavBar/NavBar.tsx';
 import { HomePage } from './components/HomePage/HomePage.tsx'; 
 
@@ -12,7 +12,7 @@ function App() {
         <NavBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignUpForm />} />
+          <Route path="/login-signup" element={<LoginSignUp />} />
         </Routes>
       </main>
     </>

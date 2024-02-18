@@ -39,8 +39,7 @@ export const NavBar = (): React.JSX.Element => {
                         profile
                     </summary>
                     <ul className="p-2 bg-base-100 rounded-t-none">
-                        <li><Link to="/signup">signup</Link></li>
-                        <li><a>login</a></li>
+                        <li><Link to="/login-signup">login | signup</Link></li>
                     </ul>
                     </details>
                 </li>

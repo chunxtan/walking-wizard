@@ -24,18 +24,18 @@ export const hashData = (data: string): hashedData => {
     return {hash: hash.toString(CryptoJS.enc.Base64), salt: salt, iterations: iterations};
 }
 
-// // Used in LoginForm.jsx handleSubmit()
-// export function hashDataWithSaltRounds(data: string, salt: string, iterations: number): string {
-//     console.log(data, salt, iterations);
-//     return CryptoJS.PBKDF2(data, salt, {
-//         keySize: KEY_SIZE,
-//         iterations: iterations
-//       }).toString(CryptoJS.enc.Base64)
-// }
+// Used in LoginForm.jsx handleSubmit()
+export function hashDataWithSaltRounds(data: string, salt: string, iterations: number): string {
+    console.log(data, salt, iterations);
+    return CryptoJS.PBKDF2(data, salt, {
+        keySize: KEY_SIZE,
+        iterations: iterations
+      }).toString(CryptoJS.enc.Base64)
+}
 
-// export function storeToken(token: string): void {
-//     localStorage.setItem('token', token);
-// }
+export function storeToken(token: string): void {
+    localStorage.setItem('token', token);
+}
 
 // export function getToken() {
 //     // getItem returns null if there's no string

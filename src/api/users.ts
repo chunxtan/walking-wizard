@@ -1,5 +1,5 @@
-import { SignUpFormInput } from "../components/UserProfile/SignUpForm/SignUpForm"
-
+import { SignUpFormInput } from "../components/UserProfile/LoginSignUp/SignUpForm"
+import { LoginDetails } from "../components/UserProfile/LoginSignUp/LoginForm"
 
 // This is the base path of the Express route we'll define
 const BASE_URL = "http://localhost:3000/users";
@@ -27,6 +27,13 @@ type CreateEndpointResponse = {
   data: UserDao
 }
 
+type GetLoginDetailsResponse = {
+  _id: string,
+  firstName: string,
+  salt: string,
+  iterations: number
+}
+
 export async function signUp(userData: SignUpFormInput): Promise<CreateEndpointResponse> {
   const createURL = BASE_URL + '/create';
   console.log(createURL);
@@ -46,45 +53,45 @@ export async function signUp(userData: SignUpFormInput): Promise<CreateEndpointR
   }
 }
 
-// export async function getLoginDetails(email) {
-//     const searchParams = new URLSearchParams({"email": email});
-//     const getLoginDetailsURL = BASE_URL + '/login?' + searchParams;
-//     console.log(getLoginDetailsURL);
+export async function getLoginDetails(email: string): Promise<GetLoginDetailsResponse> {
+    const searchParams = new URLSearchParams({"email": email});
+    const getLoginDetailsURL = BASE_URL + '/login?' + searchParams;
+    console.log(getLoginDetailsURL);
 
-//     const res = await fetch(getLoginDetailsURL, {
-//         method: "GET",
-//         headers: { "Content-Type": "application/json" },
-//     });
+    const res = await fetch(getLoginDetailsURL, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
 
-//     // Check if request was successful
-//     if (res.ok) {
-//         // res.json() will resolve to the JWT
-//         console.log(res);
-//         return res.json();
-//     } else {
-//         throw new Error("Invalid User");
-//     }
-// }
+    // Check if request was successful
+    if (res.ok) {
+        console.log(res);
+        const jsonData = res.json();
+        return jsonData;
+    } else {
+        throw new Error("Invalid User");
+    }
+}
 
-// export async function loginUser(userData) {
-//     const loginURL = BASE_URL + '/login';
-//     console.log(loginURL);
+export async function loginUser(userData: LoginDetails): Promise<string> {
+    const loginURL = BASE_URL + '/login';
+    console.log(loginURL);
 
-//     const res = await fetch(loginURL, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(userData),
-//     });
+    const res = await fetch(loginURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
 
-//     // Check if request was successful
-//     if (res.ok) {
-//       // res.json() will resolve to the JWT
-//       console.log(res);
-//       return res.json();
-//     } else {
-//       throw new Error("Invalid Login");
-//     }
-//   }
+    // Check if request was successful
+    if (res.ok) {
+      console.log(res);
+      const jsonData = res.json();
+      return jsonData;
+    } else {
+      throw new Error("Invalid Login");
+    }
+  }
   
 //   export async function logoutUser(token, userData) {
 //     // Fetch uses an options object as a second arg to make requests
