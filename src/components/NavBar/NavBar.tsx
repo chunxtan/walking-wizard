@@ -3,16 +3,13 @@ export const NavBar = (): React.JSX.Element => {
 
     return (
         <div className="navbar bg-base-100">
-            <div className="flex-1">
-                <a className="btn btn-ghost text-xl">daisyUI</a>
-            </div>
-            <div className="flex-none">
+            <div className="navbar-start">
                 <ul className="menu menu-horizontal px-1">
-                <li><a>Link</a></li>
+                <li><a>datasets</a></li>
                 <li>
                     <details>
                     <summary>
-                        Parent
+                        scenarios
                     </summary>
                     <ul className="p-2 bg-base-100 rounded-t-none">
                         <li><a>Link 1</a></li>
@@ -21,6 +18,9 @@ export const NavBar = (): React.JSX.Element => {
                     </details>
                 </li>
                 </ul>
+            </div>
+            <div className="navbar-center">
+                <a className="btn btn-ghost text-xl">walking wizard</a>
             </div>
         </div>
     )
