@@ -1,4 +1,4 @@
-{
+export const hdbData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
 "type": "FeatureCollection",
 "features": [
 { "type": "Feature", "properties": { "Name": "kml_81", "Description": "<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr><tr bgcolor=\"#E3E3F3\"> <th>BLK_NO</th> <td>746</td> </tr><tr bgcolor=\"\"> <th>ST_COD</th> <td>BER00B</td> </tr><tr bgcolor=\"#E3E3F3\"> <th>ENTITYID</th> <td>2854</td> </tr><tr bgcolor=\"\"> <th>POSTAL_COD</th> <td>470746</td> </tr><tr bgcolor=\"#E3E3F3\"> <th>INC_CRC</th> <td>B2E50EC3CEFB92EF</td> </tr><tr bgcolor=\"\"> <th>FMEL_UPD_D</th> <td>20130426120223</td> </tr></table></center>" }, "geometry": { "type": "Point", "coordinates": [ 103.921215743715535, 1.337286447994053 ] } },
