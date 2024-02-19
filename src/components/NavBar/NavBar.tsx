@@ -15,7 +15,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
             {/* NavBar Start */}
             <div className="navbar-start">
                 <ul className="menu menu-horizontal px-1">
-                <li><a>datasets</a></li>
+                <li><Link to="/datasets">datasets</Link></li>
                 <li>
                     <details>
                     <summary>
