@@ -11,7 +11,7 @@ function App() {
   return (
     <>
       <main>
-        <NavBar />
+        <NavBar userStore={userStore} />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login-signup" element={<LoginSignUp userStore={userStore} />} />

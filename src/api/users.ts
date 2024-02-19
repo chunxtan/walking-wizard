@@ -1,5 +1,6 @@
 import { SignUpFormInput } from "../components/UserProfile/LoginSignUp/SignUpForm"
 import { LoginDetails } from "../components/UserProfile/LoginSignUp/LoginForm"
+import { UserPayload } from "../components/UserProfile/LoginSignUp/LoginUserStore";
 
 // This is the base path of the Express route we'll define
 const BASE_URL = "http://localhost:3000/users";
@@ -27,11 +28,19 @@ type CreateEndpointResponse = {
   data: UserDao
 }
 
-type GetLoginDetailsResponse = {
+export type GetLoginDetailsResponse = {
   _id: string,
   firstName: string,
   salt: string,
   iterations: number
+}
+
+export type LogoutResponse = {
+  acknowledged: boolean,
+  matchedCount: number, 
+  modifiedCount: number,
+  upsertedCount: number,
+  upsertedId: string | null
 }
 
 export async function signUp(userData: SignUpFormInput): Promise<CreateEndpointResponse> {
@@ -86,33 +95,31 @@ export async function loginUser(userData: LoginDetails): Promise<string> {
     // Check if request was successful
     if (res.ok) {
       console.log(res);
-      const jsonData = res.json();
+      const jsonData = await res.json();
       return jsonData;
     } else {
       throw new Error("Invalid Login");
     }
   }
   
-//   export async function logoutUser(token, userData) {
-//     // Fetch uses an options object as a second arg to make requests
-//     // other than basic GET requests, include data, headers, etc.
-//     const logoutURL = BASE_URL + '/logout';
-//     console.log(logoutURL);
-//     console.log("logoutUser userData:", userData);
-//     const res = await fetch(logoutURL, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json",  "Authorization": token},
-//       // Fetch requires data payloads to be stringified
-//       // and assigned to a body property on the options object
-//       body: JSON.stringify(userData),
-//     });
-//     console.log("logout res:", res);
-//     // Check if request was successful
-//     if (res.ok) {
-//       // res.json() will resolve to the JWT
-//       console.log(res);
-//       return res.json();
-//     } else {
-//       throw new Error("Invalid Logout");
-//     }
-//   }
+  export async function logoutUser(token: string, userData: UserPayload): Promise<LogoutResponse> {
+    const logoutURL = BASE_URL + '/logout';
+    console.log(logoutURL);
+    console.log("logoutUser userData:", userData);
+    const res = await fetch(logoutURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json",  "Authorization": token},
+      // Fetch requires data payloads to be stringified
+      // and assigned to a body property on the options object
+      body: JSON.stringify(userData),
+    });
+    console.log("logout res:", res);
+    // Check if request was successful
+    if (res.ok) {
+      const jsonData = await res.json();
+      console.log("logout json: ", jsonData);
+      return jsonData;
+    } else {
+      throw new Error("Invalid Logout");
+    }
+  }

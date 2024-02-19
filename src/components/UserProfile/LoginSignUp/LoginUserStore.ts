@@ -1,7 +1,7 @@
 import { action, makeObservable, observable } from "mobx";
 import { getToken } from "../../../util/security"
 
-type UserPayload = {
+export type UserPayload = {
     firstName: string,
     lastName: string,
     userId: string,

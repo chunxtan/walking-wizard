@@ -1,7 +1,14 @@
 
 import { Link } from "react-router-dom";
+import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore"; 
+import { logoutUser } from "../../service/users"; 
+import { observer } from "mobx-react";
 
-export const NavBar = (): React.JSX.Element => {
+type NavBarProps = {
+    userStore: LoginUserStore
+}
+
+export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element => {
 
     return (
         <div className="navbar bg-base-100">
@@ -26,7 +33,7 @@ export const NavBar = (): React.JSX.Element => {
 
             {/* NavBar Center */}
             <div className="navbar-center">
-                <Link to="/" className="btn btn-ghost text-xl">walking wizard</Link>
+                <Link to="/" className="btn btn-ghost text-xl">WALKING WIZARD</Link>
             </div>
 
 
@@ -36,15 +43,35 @@ export const NavBar = (): React.JSX.Element => {
                 <li>
                     <details>
                     <summary>
-                        profile
+                        {
+                            userStore.user
+                            ? <h1>hello, {userStore.user.firstName}</h1>
+                            : <h1>profile</h1>
+                        }
                     </summary>
-                    <ul className="p-2 bg-base-100 rounded-t-none">
-                        <li><Link to="/login-signup">login | signup</Link></li>
-                    </ul>
+                    {
+                        userStore.user
+                        ? 
+                        <ul className="p-2 bg-base-100 rounded-t-none">
+                            <li>
+                                <a 
+                                onClick={async () => {
+                                await logoutUser();
+                                window.location.reload();
+                                }}>
+                                    logout
+                                </a>
+                            </li>
+                        </ul>
+                        :
+                        <ul className="p-2 bg-base-100 rounded-t-none">
+                            <li><Link to="/login-signup">login | signup</Link></li>
+                        </ul>
+                    }
                     </details>
                 </li>
                 </ul>
             </div>
         </div>
     )
-}
+});

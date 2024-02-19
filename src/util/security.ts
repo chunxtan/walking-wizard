@@ -52,6 +52,6 @@ export function getToken(): string | null{
     return token;
 }
 
-// export function removeToken() {
-//   localStorage.removeItem('token')
-// }
+export function removeToken() {
+  localStorage.removeItem('token')
+}
