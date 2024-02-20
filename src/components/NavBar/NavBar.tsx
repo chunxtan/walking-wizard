@@ -40,7 +40,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
             {/* NavBar End */}
             <div className="navbar-end">
                 <ul className="menu menu-horizontal px-1">
-                <li>
+                <li style={{ zIndex:"2" }}>
                     <details>
                     <summary>
                         {
@@ -53,7 +53,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
                         userStore.user
                         ? 
                         <ul className="p-2 bg-base-100 rounded-t-none">
-                            <li>
+                            <li style={{ zIndex:"2" }}>
                                 <a 
                                 onClick={async () => {
                                 await logoutUser();

@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import LayerToggleComponent from './LayerToggleComponent';
+import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -13,6 +14,37 @@ export const Map = (): React.JSX.Element => {
     const [lat, setLat] = useState<number>(1.335853410573298);
     const [zoom, setZoom] = useState<number>(9);
     const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none' }[]>([]);
+
+    const getSource = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>): void => {
+        if (map.current) {
+            map.current.addSource(id, {
+                type: 'geojson',
+                data: geoJsonData
+            })
+        }
+    }
+
+    const getLayer = (id: string, circleColor: string): void => {
+        if (map.current) {
+            map.current.addLayer({
+                "id": id,
+                "type": "circle",
+                "source": id,
+                'layout': {
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'circle-radius': 3,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': 'white',
+                    'circle-color': circleColor
+                }
+                
+            })
+
+            setLayers((prevLayers) => [...prevLayers, { id: id, visibility: 'visible'}])
+        }
+    }
 
     useEffect(() => {
         if (!map.current && mapContainer.current) {
@@ -28,28 +60,8 @@ export const Map = (): React.JSX.Element => {
                 if (map.current) {
     
                     if (!map.current.getSource("hdb") || !map.current.getLayer("hdb")) {
-                        // Add hdb data here
-                        map.current.addSource('hdbs', {
-                            type: 'geojson',
-                            data: hdbData
-                        })
-                        // Add layer here
-                        map.current.addLayer({
-                            'id': 'hdbs-layer',
-                            'type': 'circle',
-                            'source': 'hdbs',
-                            'layout': {
-                                'visibility': 'visible'
-                            },
-                            'paint': {
-                                'circle-radius': 3,
-                                'circle-stroke-width': 1,
-                                'circle-stroke-color': 'white',
-                                'circle-color': 'rgba(55,148,179,1)'
-                            }
-                        })
-
-                        setLayers((prevLayers) => [...prevLayers, { id:'hdbs-layer', visibility: 'visible'}])
+                        getSource("hdb", hdbData);
+                        getLayer("hdb", 'rgba(55,148,179,1)');
                     }
                 }
             })
