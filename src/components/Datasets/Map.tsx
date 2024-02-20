@@ -2,18 +2,17 @@ import React, { useRef, useEffect, useState, LegacyRef } from 'react';
 import mapboxgl from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
-import { DatasetList } from './DatasetsList';
+import LayerToggleComponent from './LayerToggleComponent';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export const Map = (): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
-    const map = useRef<mapboxgl.Map | null>(null);
+    const map = useRef<mapboxgl.Map>();
     const [lng, setLng] = useState<number>(103.85606546860004);
     const [lat, setLat] = useState<number>(1.335853410573298);
     const [zoom, setZoom] = useState<number>(9);
-
-    let togglebleLayerIds: string[] = [];
+    const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none' }[]>([]);
 
     useEffect(() => {
         if (!map.current && mapContainer.current) {
@@ -24,70 +23,78 @@ export const Map = (): React.JSX.Element => {
             zoom: zoom,
           });
 
-        map.current.on('move', () => {
-            if (map.current) {
-                setLng(parseFloat(map.current.getCenter().lng.toFixed(4)));
-                setLat(parseFloat(map.current.getCenter().lat.toFixed(4)));
-                setZoom(parseFloat(map.current.getZoom().toFixed(2)));
-            }
-            });
-        }
-
         if (map.current) {
             map.current.on('load', () => {
                 if (map.current) {
     
-                    // Add hdb data here
-                    map.current.addSource('hdbs', {
-                        type: 'geojson',
-                        data: hdbData
-                    })
-                    // Add layer here
-                    map.current.addLayer({
-                        'id': 'hdbs-layer',
-                        'type': 'circle',
-                        'source': 'hdbs',
-                        'layout': {
-                            'visibility': 'visible'
-                        },
-                        'paint': {
-                            'circle-radius': 3,
-                            'circle-stroke-width': 1,
-                            'circle-stroke-color': 'white',
-                            'circle-color': 'rgba(55,148,179,1)'
-                        }
-                    })
+                    if (!map.current.getSource("hdb") || !map.current.getLayer("hdb")) {
+                        // Add hdb data here
+                        map.current.addSource('hdbs', {
+                            type: 'geojson',
+                            data: hdbData
+                        })
+                        // Add layer here
+                        map.current.addLayer({
+                            'id': 'hdbs-layer',
+                            'type': 'circle',
+                            'source': 'hdbs',
+                            'layout': {
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'circle-radius': 3,
+                                'circle-stroke-width': 1,
+                                'circle-stroke-color': 'white',
+                                'circle-color': 'rgba(55,148,179,1)'
+                            }
+                        })
+
+                        setLayers((prevLayers) => [...prevLayers, { id:'hdbs-layer', visibility: 'visible'}])
+                    }
                 }
             })
-    
-            // map.current.on('idle', () => {
-            //     // If layers not added to map, abort
-            //     if (!map.current?.getLayer('hdbs')) {
-            //         return;
-            //     }
-    
-            //     togglebleLayerIds = ['hdbs'];
-            // })
-    
-            // console.log("map.current available");
-            // console.log(togglebleLayerIds);
 
-            // return () => map.current.remove();
-        }
+    }}}, []); 
 
-
-    }, [lat, lng, zoom]); 
-
+    const toggleLayerVisibility = (id: string) => {
+        setLayers((prevLayers) => {
+          if (!prevLayers) {
+            // Handle potential undefined state (optional but recommended)
+            return prevLayers; // Or throw an error or provide a default state
+          }
+      
+          const updatedLayers = prevLayers.map((layer) => {
+            if (layer.id === id && map.current) {
+                if (layer.visibility === "visible") {
+                    map.current.setLayoutProperty(id, "visibility", "none");
+                } else {
+                    map.current.setLayoutProperty(id, "visibility", "visible");
+                }
+                return { ...layer, visibility: (layer.visibility === 'visible' ? 'none' : 'visible') as "visible" | "none" }
+            } else {
+                return layer
+            }}
+          );
+      
+          return updatedLayers;
+        });
+    };
   
     return (
-      <div>
-        <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container" />
-        {
-            map.current && togglebleLayerIds 
-            ? <DatasetList datasets={togglebleLayerIds} map={map.current} />
-            : null
-        }
-      </div>
+        <div>
+            <div className="relative">
+                <div>
+                <div className="sidebar">
+                    <div id="menu">
+                        {layers.map((layer) => (
+                            <LayerToggleComponent key={layer.id} id={layer.id} active={layer.visibility === 'visible'} onToggle={toggleLayerVisibility} />
+                        ))}
+                    </div>
+                </div>
+                <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
+                </div>
+            </div>
+        </div>
     );
     
 }
