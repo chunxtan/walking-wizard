@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, LegacyRef } from 'react';
 import mapboxgl from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
+import { preschoolData } from '../../datasets/preschools_bedok'; 
 import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 
@@ -15,17 +16,14 @@ export const Map = (): React.JSX.Element => {
     const [zoom, setZoom] = useState<number>(9);
     const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none' }[]>([]);
 
-    const getSource = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>): void => {
+    const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
         if (map.current) {
+
             map.current.addSource(id, {
                 type: 'geojson',
                 data: geoJsonData
             })
-        }
-    }
 
-    const getLayer = (id: string, circleColor: string): void => {
-        if (map.current) {
             map.current.addLayer({
                 "id": id,
                 "type": "circle",
@@ -44,6 +42,7 @@ export const Map = (): React.JSX.Element => {
 
             setLayers((prevLayers) => [...prevLayers, { id: id, visibility: 'visible'}])
         }
+
     }
 
     useEffect(() => {
@@ -57,13 +56,10 @@ export const Map = (): React.JSX.Element => {
 
         if (map.current) {
             map.current.on('load', () => {
-                if (map.current) {
-    
-                    if (!map.current.getSource("hdb") || !map.current.getLayer("hdb")) {
-                        getSource("hdb", hdbData);
-                        getLayer("hdb", 'rgba(55,148,179,1)');
-                    }
-                }
+
+                addSourceLayer("hdb", hdbData, 'rgba(55,148,179,1)');
+
+                addSourceLayer("preschools", preschoolData, 'rgb(125, 125, 222)');
             })
 
     }}}, []); 
