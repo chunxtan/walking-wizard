@@ -3,6 +3,8 @@ import mapboxgl from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import { preschoolData } from '../../datasets/preschools_bedok'; 
+import { mrtData } from '../../datasets/mrt_bedok_centroid';
+import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 
@@ -57,6 +59,33 @@ export const Map = (): React.JSX.Element => {
                 addSourceLayer("hdb", hdbData, 'rgba(55,148,179,1)');
 
                 addSourceLayer("preschools", preschoolData, 'rgb(125, 125, 222)');
+
+                addSourceLayer("mrt", mrtData, 'rgb(57, 143, 45)');
+
+                // add network
+                if (map.current) {
+
+                    map.current.addSource("network", {
+                        type: 'geojson',
+                        data: networkData
+                    })
+        
+                    map.current.addLayer({
+                        "id": "network",
+                        "type": "line",
+                        "source": "network",
+                        'layout': {
+                            'visibility': 'visible'
+                        },
+                        'paint': {
+                            'line-color': "rgb(74, 169, 242)",
+                            'line-width': 3
+                        }
+                        
+                    })
+        
+                    setLayers((prevLayers) => [...prevLayers, { id: "network", visibility: 'visible'}])
+                }
             })
 
     }}}, []); 
