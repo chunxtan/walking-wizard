@@ -39,3 +39,9 @@
 #menu button.active:hover {
     background: #3074a4;
 }
+
+#layer-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
