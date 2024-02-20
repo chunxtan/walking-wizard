@@ -10,7 +10,6 @@ interface LayerToggleProps {
 const LayerToggleComponent: React.FC<LayerToggleProps> = ({ id, active, onToggle }) => {
   return (
     <div id="layer-toggle">
-        <input type="checkbox" defaultChecked className="checkbox checkbox-xs" /> 
         <button
         id={id}
         className={active ? "active menu" : "menu"}

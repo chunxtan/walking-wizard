@@ -10,10 +10,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export const Map = (): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
-    const map = useRef<mapboxgl.Map>();
-    const [lng, setLng] = useState<number>(103.85606546860004);
-    const [lat, setLat] = useState<number>(1.335853410573298);
-    const [zoom, setZoom] = useState<number>(9);
+    const map = useRef<mapboxgl.Map>();9
     const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none' }[]>([]);
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
@@ -50,8 +47,8 @@ export const Map = (): React.JSX.Element => {
           map.current = new mapboxgl.Map({
             container: mapContainer.current,
             style: "mapbox://styles/mapbox/streets-v12",
-            center: [lng, lat],
-            zoom: zoom,
+            center: [103.85606546860004, 1.335853410573298],
+            zoom: 9,
           });
 
         if (map.current) {
