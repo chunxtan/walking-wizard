@@ -44,3 +44,9 @@
     flex-direction: row;
     align-items: center;
 }
+
+.layer-btns {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
