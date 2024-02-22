@@ -13,7 +13,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 export const Map = (): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();9
-    const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none' }[]>([]);
+    const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none'; isEditing: boolean }[]>([]);
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
         if (map.current) {
@@ -39,7 +39,7 @@ export const Map = (): React.JSX.Element => {
                 
             })
 
-            setLayers((prevLayers) => [...prevLayers, { id: id, visibility: 'visible'}])
+            setLayers((prevLayers) => [...prevLayers, { id: id, visibility: 'visible', isEditing: false}])
         }
 
     }
@@ -84,27 +84,34 @@ export const Map = (): React.JSX.Element => {
                         
                     })
         
-                    setLayers((prevLayers) => [...prevLayers, { id: "network", visibility: 'visible'}])
+                    setLayers((prevLayers) => [...prevLayers, { id: "network", visibility: 'visible', isEditing: false}])
                 }
             })
 
     }}}, []); 
 
-    const toggleLayerVisibility = (id: string) => {
+    const toggleLayerVisibility = (id: string, toggleType: "vis" | "edit") => {
         setLayers((prevLayers) => {
           if (!prevLayers) {
-            // Handle potential undefined state (optional but recommended)
-            return prevLayers; // Or throw an error or provide a default state
+            return prevLayers; 
           }
       
           const updatedLayers = prevLayers.map((layer) => {
             if (layer.id === id && map.current) {
-                if (layer.visibility === "visible") {
-                    map.current.setLayoutProperty(id, "visibility", "none");
+                if (toggleType === "vis") { 
+                    if (layer.visibility === "visible") {
+                        map.current.setLayoutProperty(id, "visibility", "none");
+                    } else {
+                        map.current.setLayoutProperty(id, "visibility", "visible");
+                    }
+                    return { ...layer, visibility: (layer.visibility === 'visible' ? 'none' : 'visible') as "visible" | "none" }
                 } else {
-                    map.current.setLayoutProperty(id, "visibility", "visible");
+                    if (layer.isEditing === true) {
+                        return { ...layer, isEditing: false }
+                    } else {
+                        return { ...layer, isEditing: true }
+                    }
                 }
-                return { ...layer, visibility: (layer.visibility === 'visible' ? 'none' : 'visible') as "visible" | "none" }
             } else {
                 return layer
             }}
