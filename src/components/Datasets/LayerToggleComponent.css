@@ -10,10 +10,9 @@
     font-family: 'Open Sans', sans-serif;
 }
     
-#menu button {
+/* #menu button {
     font-size: 8px;
     color: #404040;
-    /* display: block; */
     margin: 0;
     padding: 0;
     padding: 10px;
@@ -38,7 +37,7 @@
     
 #menu button.active:hover {
     background: #3074a4;
-}
+} */
 
 #layer-toggle {
     display: flex;

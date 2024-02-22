@@ -79,7 +79,7 @@ export const Map = (): React.JSX.Element => {
                         },
                         'paint': {
                             'line-color': "rgb(74, 169, 242)",
-                            'line-width': 3
+                            'line-width': 2
                         }
                         
                     })
