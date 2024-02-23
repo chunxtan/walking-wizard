@@ -26,11 +26,13 @@ export class MapStore {
             layers: observable,
             layersReady: observable,
             markers: observable,
+            currEditingLayer: observable,
             addLayer: action,
             setLayerProps: action,
             addMarker: action,
             toggleLayersReady: action,
-            clearCoordsMarkers: action
+            clearCoordsMarkers: action,
+            setCurrEditingLayer: action
         })
     }
 

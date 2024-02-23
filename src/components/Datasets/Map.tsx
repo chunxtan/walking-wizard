@@ -9,6 +9,7 @@ import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { MapStore, DatasetLayer } from './MapStore';
 import { observer } from 'mobx-react';
+import { EditDatasetCard } from './EditDatasetCard';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -102,19 +103,20 @@ export const Map = observer((): React.JSX.Element => {
     // To add new markers
     useEffect(() => {
         if (map.current) {
-            map.current.on('click', (e: MapMouseEvent) => {
 
-                // check if isEditing is on for any layers
-                const editingLayer: DatasetLayer[] = mapStore.getEditingLayers();
+            // check if isEditing is on for any layers
+            const editingLayer: DatasetLayer[] = mapStore.getEditingLayers();
 
-                if (editingLayer.length > 1) {
-                    console.log("layers in editing mode: ", editingLayer);
-                    throw new Error("More than one layer in editing mode.") 
-                }
-                // Ensures that only single layer in editing mode 
-                else if (editingLayer.length == 1) {
-                    mapStore.setCurrEditingLayer(editingLayer[0].layerId);
-    
+            if (editingLayer.length > 1) {
+                console.log("layers in editing mode: ", editingLayer);
+                throw new Error("More than one layer in editing mode.") 
+            }
+
+            // Ensures that only single layer in editing mode 
+            else if (editingLayer.length == 1) {
+            mapStore.setCurrEditingLayer(editingLayer[0].layerId);
+
+                map.current.on('click', (e: MapMouseEvent) => {
                     // store click coords in state
                     mapStore.setClickCoords(e.lngLat);
     
@@ -127,13 +129,13 @@ export const Map = observer((): React.JSX.Element => {
                         console.log("marker:", marker);
                         mapStore.addMarker(marker);
                     }
-
                 }
-                else {
-                    console.log("No layers in editing mode.")
-                    return
-                }
-            })
+            )}
+                
+            else {
+                console.log("No layers in editing mode.")
+                return
+            }
 
             // To delete marker
             map.current.on('dblclick', () => {
@@ -174,16 +176,26 @@ export const Map = observer((): React.JSX.Element => {
     return (
         <div>
             <div id="map-frame" className="relative">
-                <div className="sidebar card">
-                    <div id="menu">
+                <div className="sidebar h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+                    <ul id='menu' className="space-y-2 font-medium">
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} mapStore={mapStore} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
                                 ))
                             : null
                         }
-                    </div>
+                    </ul>
                 </div>
+
+                {
+                    mapStore.currEditingLayer
+                    ? 
+                    <div className="sidebar-right">
+                        <EditDatasetCard mapStore={mapStore}/>
+                    </div>
+                    :
+                    null
+                }
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
 
             </div>

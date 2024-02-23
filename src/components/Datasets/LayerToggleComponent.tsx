@@ -1,21 +1,18 @@
 import React from 'react';
 import "./LayerToggleComponent.css"
 import { observer } from 'mobx-react';
-import { MapStore } from './MapStore';
-import { SaveDatasetModal } from './SaveDatasetModal';
 
 interface LayerToggleProps {
   id: string;
   active: boolean;
   onToggle: (id: string, toggleType: "vis" | "edit") => void;
-  mapStore: MapStore
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, mapStore }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle }) => {
   return (
-    <div id="layer-toggle">
-            <h1><b>{id.toUpperCase()}</b></h1>
-            <div className='layer-btns'>
+    <li id="layer-toggle" className='flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group'>
+            
+            <span id="icon-slot">
                 <button className={active ? "active menu" : "menu"}
                     id={id}
                     onClick={() => onToggle(id, "vis")}>
@@ -33,33 +30,24 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                         </svg>
                     }
                 </button>
-                <button
-                    onClick={() => onToggle(id, "edit")}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-                        <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
-                        <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
-                    </svg>
-                </button>
-            </div>
+            </span>
 
-            <dialog id="save-dataset-modal" className='modal'>
-                <SaveDatasetModal />
-            </dialog>
+            <span id="title-slot">
+                <p className='text-xs text-gray-900 dark:text-white'>{id.toUpperCase()}</p>
+            </span>
 
-            <div id="dataset-edit">
-                    <p>{mapStore.markers.length} markers added</p>
+            <span id="options-slot">
+                <div className='layer-btns'>
                     <button
-                        onClick={() => {
-                            const saveDatasetModal = document.getElementById('save-dataset-modal') as HTMLFormElement;
-                            if (saveDatasetModal) {
-                                saveDatasetModal.showModal()
-                            }}}>
-                        Save
+                        onClick={() => onToggle(id, "edit")}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                            <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                            <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                        </svg>
                     </button>
-            </div>
-
-
-    </div>
+                </div>
+            </span>
+    </li>
   );
 });
 

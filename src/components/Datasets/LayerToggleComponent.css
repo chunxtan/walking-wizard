@@ -1,13 +1,23 @@
-#menu {
-    /* background: #fff; */
-    /* position: absolute; */
-    z-index: 1;
-    top: 10px;
-    right: 10px;
-    border-radius: 3px;
-    width: 120px;
-    /* border: 1px solid rgba(0, 0, 0, 0.4); */
-    font-family: 'Open Sans', sans-serif;
+
+#layer-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+#icon-slot,
+#options-slot {
+    display: in-line-flex;
+    align-items: center;
+}
+
+#title-slot {
+    display: flex;
+    flex-grow: 1;
+    justify-content: left;
+    padding-left: 5px;
 }
     
 /* #menu button {
@@ -38,12 +48,6 @@
 #menu button.active:hover {
     background: #3074a4;
 } */
-
-#layer-toggle {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
 
 .layer-btns {
     display: flex;
