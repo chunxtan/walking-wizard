@@ -176,8 +176,9 @@ export const Map = observer((): React.JSX.Element => {
     return (
         <div>
             <div id="map-frame" className="relative">
-                <div className="sidebar h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+                <div className="sidebar max-w-sm p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                     <ul id='menu' className="space-y-2 font-medium">
+                        Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
                                     <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
