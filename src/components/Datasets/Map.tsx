@@ -173,8 +173,7 @@ export const Map = observer((): React.JSX.Element => {
   
     return (
         <div>
-            <div className="relative">
-                <div>
+            <div id="map-frame" className="relative">
                 <div className="sidebar card">
                     <div id="menu">
                         { mapStore.layersReady
@@ -186,7 +185,7 @@ export const Map = observer((): React.JSX.Element => {
                     </div>
                 </div>
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
-                </div>
+
             </div>
         </div>
     );

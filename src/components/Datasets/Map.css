@@ -1,3 +1,7 @@
+#map-frame {
+  display: flex
+}
+
 .map-container {
     height: 400px;
   }
