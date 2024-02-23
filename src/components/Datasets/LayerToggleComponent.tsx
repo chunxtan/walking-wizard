@@ -1,5 +1,6 @@
 import React from 'react';
 import "./LayerToggleComponent.css"
+import { observer } from 'mobx-react';
 
 interface LayerToggleProps {
   id: string;
@@ -7,11 +8,11 @@ interface LayerToggleProps {
   onToggle: (id: string, toggleType: "vis" | "edit") => void;
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = ({ id, active, onToggle }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle }) => {
+    console.log("layer toggle render")
   return (
     <div id="layer-toggle">
-        <div>
-            <h1>{id}</h1>
+            <h1><b>{id.toUpperCase()}</b></h1>
             <div className='layer-btns'>
                 <button className={active ? "active menu" : "menu"}
                     id={id}
@@ -38,9 +39,8 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = ({ id, active, onToggle
                     </svg>
                 </button>
             </div>
-        </div>
     </div>
   );
-};
+});
 
 export default LayerToggleComponent;

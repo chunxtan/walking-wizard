@@ -1,26 +1,58 @@
 import { LngLat, Marker } from "mapbox-gl";
+import { action, makeObservable, observable } from "mobx";
 
-type LayerVisibility = {
-    [layerName: string]: boolean
+
+export type DatasetLayer = { 
+    layerId: string, 
+    visibility: 'visible' | 'none',
+    isEditing: boolean 
 }
 
 export class MapStore {
-    layerVisibility: LayerVisibility;
+    layers: DatasetLayer[];
+    layersReady: boolean;
     clickCoords: LngLat;
-    // addedMarkers to be cleared after the edit function is complete/cancelled
     markers: Marker[];
     currEditingLayer: string;
 
     constructor() {
-        this.layerVisibility = {};
+        this.layers = [];
+        this.layersReady = false;
         this.clickCoords = new LngLat(0, 0);
         this.markers = [];
         this.currEditingLayer = "";
+
+        makeObservable(this, {
+            layers: observable,
+            layersReady: observable,
+            addLayer: action,
+            setLayerProps: action,
+            toggleLayersReady: action
+        })
     }
 
-    setLayerVisibility(newVis: LayerVisibility) {
-        this.layerVisibility = newVis;
+    addLayer(newLayer: DatasetLayer) {
+        this.layers.push(newLayer);
+    }
+
+    setLayerProps(updatedLayers: DatasetLayer[]) {
+        this.layers = updatedLayers;
     } 
+
+    toggleLayersReady(val: boolean) {
+        this.layersReady = val;
+    }
+
+    getEditingLayers() {
+        const editingLayer: DatasetLayer[] = [];
+        this.layers.forEach((layer) => {
+            if (layer.isEditing) {
+                editingLayer.push(layer);
+            }
+        })
+
+        return editingLayer;
+    }
 
     setClickCoords(coords: LngLat) {
         this.clickCoords = coords;

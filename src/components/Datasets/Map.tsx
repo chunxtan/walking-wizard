@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, LegacyRef } from 'react';
-import mapboxgl, { LngLatLike, MapMouseEvent } from "mapbox-gl";
+import React, { useRef, useEffect, LegacyRef } from 'react';
+import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import { preschoolData } from '../../datasets/preschools_bedok'; 
@@ -7,20 +7,21 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { MapStore } from './MapStore';
+import { MapStore, DatasetLayer } from './MapStore';
+import { observer } from 'mobx-react';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-export type DatasetLayers = { id: string; visibility: 'visible' | 'none'; isEditing: boolean }
 
-export const Map = (): React.JSX.Element => {
+// Set up store
+const mapStore = new MapStore();
+
+export const Map = observer((): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
-    const map = useRef<mapboxgl.Map>();9
-    const [layers, setLayers] = useState<DatasetLayers[]>([]);
-    const [layersReady, setLayersReady] = useState<boolean>(false);
+    const map = useRef<mapboxgl.Map>();
+    // const [layers, setLayers] = useState<DatasetLayers[]>([]);
+    // const [layersReady, setLayersReady] = useState<boolean>(false);
 
-    // Set up store
-    const mapStore = new MapStore();
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
         if (map.current) {
@@ -46,7 +47,7 @@ export const Map = (): React.JSX.Element => {
                 
             })
 
-            setLayers((prevLayers) => [...prevLayers, { id: id, visibility: 'visible', isEditing: false}])
+            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false});
         }
 
     }
@@ -93,34 +94,31 @@ export const Map = (): React.JSX.Element => {
                         
                     })
         
-                    setLayers((prevLayers) => [...prevLayers, { id: "network", visibility: 'visible', isEditing: false}])
+                    
+                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false});
                 }
             })
 
-            setLayersReady(true);
+            mapStore.toggleLayersReady(true);
 
     }}}, []); 
 
     // To add new markers
     useEffect(() => {
-        console.log("layer.isEditing", layers.map((layer) => layer.isEditing))
+        console.log("layer.isEditing", mapStore.layers.map((layer) => layer.isEditing))
         if (map.current) {
             map.current.on('click', (e: MapMouseEvent) => {
 
                 // check if isEditing is on for any layers
-                const editingLayer: DatasetLayers[] = [];
-                layers.forEach((layer) => {
-                    if (layer.isEditing) {
-                        editingLayer.push(layer);
-                    }
-                })
+                const editingLayer: DatasetLayer[] = mapStore.getEditingLayers();
+
                 if (editingLayer.length > 1) {
                     console.log("layers in editing mode: ", editingLayer);
                     throw new Error("More than one layer in editing mode.") 
                 }
                 // Ensures that only single layer in editing mode 
                 else if (editingLayer.length == 1) {
-                    mapStore.setCurrEditingLayer(editingLayer[0].id);
+                    mapStore.setCurrEditingLayer(editingLayer[0].layerId);
     
                     // store click coords in state
                     mapStore.setClickCoords(e.lngLat);
@@ -149,22 +147,19 @@ export const Map = (): React.JSX.Element => {
                 // if yes, remove
             })
         }
-    }, layersReady ? layers.map((layer) => layer.isEditing) : [])
+    }, mapStore.layersReady ? mapStore.layers.map((layer) => layer.isEditing) : [])
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
-        setLayers((prevLayers) => {
-          if (!prevLayers) {
-            return prevLayers; 
-          }
       
-          const updatedLayers = prevLayers.map((layer) => {
-            if (layer.id === id && map.current) {
+          const updatedLayers = mapStore.layers.map((layer) => {
+            if (layer.layerId === id && map.current) {
                 if (toggleType === "vis") { 
                     if (layer.visibility === "visible") {
                         map.current.setLayoutProperty(id, "visibility", "none");
                     } else {
                         map.current.setLayoutProperty(id, "visibility", "visible");
                     }
+
                     return { ...layer, visibility: (layer.visibility === 'visible' ? 'none' : 'visible') as "visible" | "none" }
                 } else {
                     if (layer.isEditing === true) {
@@ -178,8 +173,7 @@ export const Map = (): React.JSX.Element => {
             }}
           );
       
-          return updatedLayers;
-        });
+          mapStore.setLayerProps(updatedLayers);
     };
   
     return (
@@ -188,9 +182,12 @@ export const Map = (): React.JSX.Element => {
                 <div>
                 <div className="sidebar card">
                     <div id="menu">
-                        {layers.map((layer) => (
-                            <LayerToggleComponent key={layer.id} id={layer.id} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
-                        ))}
+                        { mapStore.layersReady
+                            ? mapStore.layers.map((layer) => (
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
+                                ))
+                            : null
+                        }
                     </div>
                 </div>
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
@@ -199,4 +196,4 @@ export const Map = (): React.JSX.Element => {
         </div>
     );
     
-}
+})
