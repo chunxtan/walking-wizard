@@ -16,7 +16,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
 
                 {/* NavBar Start */}
                 <div>
-                    <Link to="/" className="btn btn-ghost text-xl">WALKING WIZARD</Link>
+                   <Link to="/" className="btn btn-ghost text-2xl font-medium dark:text-white"><span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">walking wizard</span></Link>
                 </div>
 
                 {/* NavBar Center */}
