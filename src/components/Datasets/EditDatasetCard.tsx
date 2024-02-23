@@ -4,7 +4,7 @@ import { useState } from "react";
 import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";
 import { mrtData } from "../../datasets/mrt_bedok_centroid";
-import { Feature, GeoJsonProperties, Geometry } from "geojson";
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
 import { LngLat } from "mapbox-gl";
 
 const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
@@ -14,7 +14,8 @@ const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometr
 }
 
 type EditDatasetCardProps = {
-    mapStore: MapStore
+    mapStore: MapStore,
+    addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string) => void
 }
 
 type SaveFormInput = {
@@ -22,7 +23,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditDatasetCard = observer(({ mapStore }: EditDatasetCardProps) : React.JSX.Element => {
+export const EditDatasetCard = observer(({ mapStore, addSourceLayer }: EditDatasetCardProps) : React.JSX.Element => {
     const [saveInput, setSaveInput] = useState<SaveFormInput>({
         title: "",
         description: ""
@@ -39,6 +40,11 @@ export const EditDatasetCard = observer(({ mapStore }: EditDatasetCardProps) : R
         mapStore.setCurrEditingLayer(null);
         mapStore.markers.forEach(marker => marker.remove());
         mapStore.clearCoordsMarkers();
+
+        mapStore.setLayerProps(mapStore.layers.map((layer) => ({
+            ...layer,
+            isEditing: false,
+        })))
     }
 
     const handleSubmit = async () => {
@@ -58,13 +64,14 @@ export const EditDatasetCard = observer(({ mapStore }: EditDatasetCardProps) : R
             } as Feature<Geometry, GeoJsonProperties>;
         })
 
-
-
+        // TODO: Add user payload into POST req
         const datasetData = {
             // saveInput
             ...saveInput, 
             // copy features from geojson of parentLayer
-            newFeatures: newPoints
+            newFeatures: newPoints,
+            parentLayerId: mapStore.currEditingLayer
+
         }
         console.log("datasetData", datasetData);
 
@@ -78,6 +85,24 @@ export const EditDatasetCard = observer(({ mapStore }: EditDatasetCardProps) : R
             console.log("dataset POST: ", res);
 
             if (res.ok) {
+                // add new dataset to map
+                // let newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+                if (mapStore.currEditingLayer !== null) {
+                    const currEditingLayerId = mapStore.currEditingLayer;
+                    const currData = DATASETID_LOOKUP[currEditingLayerId];
+                    // const currPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [...currData.features] as Feature<Geometry, GeoJsonProperties>[];
+                    const newPointDataFeatures = currData.features.concat(newPoints);
+                    const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+                        "type": "FeatureCollection",
+                        "features": newPointDataFeatures
+                    }
+                    console.log("before", currData.features);
+                    console.log("after", newPointDataFeatures);
+                    console.log("newGeoJsonData", newGeoJsonData);
+
+                    addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId);
+                } 
+
 
                 // reset form & close card
                 setSaveInput({

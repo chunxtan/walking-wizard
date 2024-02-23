@@ -1,5 +1,5 @@
 import { LngLat, Marker } from "mapbox-gl";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 
 export type DatasetLayer = { 
@@ -32,7 +32,8 @@ export class MapStore {
             addMarker: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
-            setCurrEditingLayer: action
+            setCurrEditingLayer: action,
+            totalEditingLayers: computed
         })
     }
 
@@ -48,15 +49,20 @@ export class MapStore {
         this.layersReady = val;
     }
 
-    getEditingLayers() {
+    get editingLayers() {
         const editingLayer: DatasetLayer[] = [];
         this.layers.forEach((layer) => {
             if (layer.isEditing) {
                 editingLayer.push(layer);
             }
         })
-
         return editingLayer;
+        
+    }
+
+    get totalEditingLayers() {
+        const editingLayer = this.editingLayers;
+        return editingLayer.length;
     }
 
     setClickCoords(coords: LngLat) {

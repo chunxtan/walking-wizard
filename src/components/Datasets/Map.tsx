@@ -16,13 +16,18 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 // Set up store
 const mapStore = new MapStore();
 
+const DATASET_COLOR_LOOKUP: Record<string, string> = {
+    "hdb": 'rgba(55,148,179,1)',
+    "preschools": 'rgb(125, 125, 222)',
+    "mrt": 'rgb(57, 143, 45)' 
+}
+
 export const Map = observer((): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
 
-    const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
+    const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string = id) => {
         if (map.current) {
-
             map.current.addSource(id, {
                 type: 'geojson',
                 data: geoJsonData
@@ -39,7 +44,7 @@ export const Map = observer((): React.JSX.Element => {
                     'circle-radius': 3,
                     'circle-stroke-width': 1,
                     'circle-stroke-color': 'white',
-                    'circle-color': circleColor
+                    'circle-color': DATASET_COLOR_LOOKUP[parentId]
                 }
                 
             })
@@ -63,11 +68,11 @@ export const Map = observer((): React.JSX.Element => {
             // Load layers 
             map.current.on('load', () => {
 
-                addSourceLayer("hdb", hdbData, 'rgba(55,148,179,1)');
+                addSourceLayer("hdb", hdbData);
 
-                addSourceLayer("preschools", preschoolData, 'rgb(125, 125, 222)');
+                addSourceLayer("preschools", preschoolData);
 
-                addSourceLayer("mrt", mrtData, 'rgb(57, 143, 45)');
+                addSourceLayer("mrt", mrtData);
 
                 // add network
                 if (map.current) {
@@ -105,16 +110,14 @@ export const Map = observer((): React.JSX.Element => {
         if (map.current) {
 
             // check if isEditing is on for any layers
-            const editingLayer: DatasetLayer[] = mapStore.getEditingLayers();
 
-            if (editingLayer.length > 1) {
-                console.log("layers in editing mode: ", editingLayer);
+            if (mapStore.totalEditingLayers > 1) {
                 throw new Error("More than one layer in editing mode.") 
             }
 
             // Ensures that only single layer in editing mode 
-            else if (editingLayer.length == 1) {
-            mapStore.setCurrEditingLayer(editingLayer[0].layerId);
+            else if (mapStore.totalEditingLayers == 1) {
+            mapStore.setCurrEditingLayer(mapStore.editingLayers[0].layerId);
 
                 map.current.on('click', (e: MapMouseEvent) => {
                     // store click coords in state
@@ -192,7 +195,7 @@ export const Map = observer((): React.JSX.Element => {
                     mapStore.currEditingLayer
                     ? 
                     <div className="sidebar-right">
-                        <EditDatasetCard mapStore={mapStore}/>
+                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} />
                     </div>
                     :
                     null
