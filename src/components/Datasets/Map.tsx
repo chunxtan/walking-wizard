@@ -7,7 +7,7 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { MapStore, DatasetLayer } from './MapStore';
+import { MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 
