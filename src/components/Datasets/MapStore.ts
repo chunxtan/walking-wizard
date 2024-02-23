@@ -13,14 +13,14 @@ export class MapStore {
     layersReady: boolean;
     clickCoords: LngLat;
     markers: Marker[];
-    currEditingLayer: string;
+    currEditingLayer: string | null;
 
     constructor() {
         this.layers = [];
         this.layersReady = false;
         this.clickCoords = new LngLat(0, 0);
         this.markers = [];
-        this.currEditingLayer = "";
+        this.currEditingLayer = null;
 
         makeObservable(this, {
             layers: observable,
@@ -72,7 +72,7 @@ export class MapStore {
         this.markers.length = 0;
     }
 
-    setCurrEditingLayer(id: string) {
+    setCurrEditingLayer(id: string | null) {
         this.currEditingLayer = id;
     }
 }
