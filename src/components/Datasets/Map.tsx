@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, LegacyRef } from 'react';
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { LngLatLike, MapMouseEvent } from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import { preschoolData } from '../../datasets/preschools_bedok'; 
@@ -7,13 +7,20 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { MapStore } from './MapStore';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+export type DatasetLayers = { id: string; visibility: 'visible' | 'none'; isEditing: boolean }
 
 export const Map = (): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();9
-    const [layers, setLayers] = useState<{ id: string; visibility: 'visible' | 'none'; isEditing: boolean }[]>([]);
+    const [layers, setLayers] = useState<DatasetLayers[]>([]);
+    const [layersReady, setLayersReady] = useState<boolean>(false);
+
+    // Set up store
+    const mapStore = new MapStore();
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
         if (map.current) {
@@ -45,6 +52,7 @@ export const Map = (): React.JSX.Element => {
     }
 
     useEffect(() => {
+        // Set up map
         if (!map.current && mapContainer.current) {
           map.current = new mapboxgl.Map({
             container: mapContainer.current,
@@ -54,6 +62,7 @@ export const Map = (): React.JSX.Element => {
           });
 
         if (map.current) {
+            // Load layers 
             map.current.on('load', () => {
 
                 addSourceLayer("hdb", hdbData, 'rgba(55,148,179,1)');
@@ -88,9 +97,61 @@ export const Map = (): React.JSX.Element => {
                 }
             })
 
+            setLayersReady(true);
+
     }}}, []); 
 
-    const toggleLayerVisibility = (id: string, toggleType: "vis" | "edit") => {
+    // To add new markers
+    useEffect(() => {
+        console.log("layer.isEditing", layers.map((layer) => layer.isEditing))
+        if (map.current) {
+            map.current.on('click', (e: MapMouseEvent) => {
+
+                // check if isEditing is on for any layers
+                const editingLayer: DatasetLayers[] = [];
+                layers.forEach((layer) => {
+                    if (layer.isEditing) {
+                        editingLayer.push(layer);
+                    }
+                })
+                if (editingLayer.length > 1) {
+                    console.log("layers in editing mode: ", editingLayer);
+                    throw new Error("More than one layer in editing mode.") 
+                }
+                // Ensures that only single layer in editing mode 
+                else if (editingLayer.length == 1) {
+                    mapStore.setCurrEditingLayer(editingLayer[0].id);
+    
+                    // store click coords in state
+                    mapStore.setClickCoords(e.lngLat);
+    
+                    // create moveable marker with coords state
+                    if (map.current) {
+                        // TODO: make marker draggable
+                        const marker = new mapboxgl.Marker()
+                            .setLngLat(mapStore.clickCoords)
+                            .addTo(map.current)
+
+                        mapStore.addMarker(marker);
+                    }
+
+                }
+                else {
+                    console.log("No layers in editing mode.")
+                    return
+                }
+            })
+
+            // To delete marker
+            map.current.on('dblclick', () => {
+                // check if coord is in marker[] state
+
+                // if yes, remove
+            })
+        }
+    }, layersReady ? layers.map((layer) => layer.isEditing) : [])
+
+    const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
         setLayers((prevLayers) => {
           if (!prevLayers) {
             return prevLayers; 
@@ -125,10 +186,10 @@ export const Map = (): React.JSX.Element => {
         <div>
             <div className="relative">
                 <div>
-                <div className="sidebar">
+                <div className="sidebar card">
                     <div id="menu">
                         {layers.map((layer) => (
-                            <LayerToggleComponent key={layer.id} id={layer.id} active={layer.visibility === 'visible'} onToggle={toggleLayerVisibility} />
+                            <LayerToggleComponent key={layer.id} id={layer.id} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
                         ))}
                     </div>
                 </div>
