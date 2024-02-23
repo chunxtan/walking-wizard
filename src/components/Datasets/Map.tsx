@@ -12,16 +12,12 @@ import { observer } from 'mobx-react';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-
 // Set up store
 const mapStore = new MapStore();
 
 export const Map = observer((): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
-    // const [layers, setLayers] = useState<DatasetLayers[]>([]);
-    // const [layersReady, setLayersReady] = useState<boolean>(false);
-
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, circleColor: string) => {
         if (map.current) {
@@ -105,7 +101,6 @@ export const Map = observer((): React.JSX.Element => {
 
     // To add new markers
     useEffect(() => {
-        console.log("layer.isEditing", mapStore.layers.map((layer) => layer.isEditing))
         if (map.current) {
             map.current.on('click', (e: MapMouseEvent) => {
 
@@ -129,7 +124,7 @@ export const Map = observer((): React.JSX.Element => {
                         const marker = new mapboxgl.Marker()
                             .setLngLat(mapStore.clickCoords)
                             .addTo(map.current)
-
+                        console.log("marker:", marker);
                         mapStore.addMarker(marker);
                     }
 
@@ -184,7 +179,7 @@ export const Map = observer((): React.JSX.Element => {
                     <div id="menu">
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} mapStore={mapStore} />
                                 ))
                             : null
                         }

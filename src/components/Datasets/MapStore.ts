@@ -25,9 +25,12 @@ export class MapStore {
         makeObservable(this, {
             layers: observable,
             layersReady: observable,
+            markers: observable,
             addLayer: action,
             setLayerProps: action,
-            toggleLayersReady: action
+            addMarker: action,
+            toggleLayersReady: action,
+            clearCoordsMarkers: action
         })
     }
 

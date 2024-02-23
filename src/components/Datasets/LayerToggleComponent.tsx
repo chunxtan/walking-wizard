@@ -1,15 +1,17 @@
 import React from 'react';
 import "./LayerToggleComponent.css"
 import { observer } from 'mobx-react';
+import { MapStore } from './MapStore';
+import { SaveDatasetModal } from './SaveDatasetModal';
 
 interface LayerToggleProps {
   id: string;
   active: boolean;
   onToggle: (id: string, toggleType: "vis" | "edit") => void;
+  mapStore: MapStore
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle }) => {
-    console.log("layer toggle render")
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, mapStore }) => {
   return (
     <div id="layer-toggle">
             <h1><b>{id.toUpperCase()}</b></h1>
@@ -39,6 +41,24 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                     </svg>
                 </button>
             </div>
+
+            <dialog id="save-dataset-modal" className='modal'>
+                <SaveDatasetModal />
+            </dialog>
+
+            <div id="dataset-edit">
+                    <p>{mapStore.markers.length} markers added</p>
+                    <button
+                        onClick={() => {
+                            const saveDatasetModal = document.getElementById('save-dataset-modal') as HTMLFormElement;
+                            if (saveDatasetModal) {
+                                saveDatasetModal.showModal()
+                            }}}>
+                        Save
+                    </button>
+            </div>
+
+
     </div>
   );
 });
