@@ -96,9 +96,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer }: EditDatas
                         "type": "FeatureCollection",
                         "features": newPointDataFeatures
                     }
-                    console.log("before", currData.features);
-                    console.log("after", newPointDataFeatures);
-                    console.log("newGeoJsonData", newGeoJsonData);
 
                     addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId);
                 } 
@@ -113,66 +110,68 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer }: EditDatas
 
                 const jsonData = await res.json();
                 console.log("dataset POST JSON: ", jsonData);
-                // Sample jsonData
-                // {
-                //     "success": true,
-                //     "data": {
-                //         "title": "Test HDB Layer",
-                //         "description": "jus for fun",
-                //         "newFeatures": [
-                //             {
-                //                 "type": "Feature",
-                //                 "properties": {
-                //                     "_id": "65d86d23cb5f74939001d513"
-                //                 },
-                //                 "geometry": {
-                //                     "type": "Point",
-                //                     "coordinates": [
-                //                         103.9245885212186,
-                //                         1.3260592219579053
-                //                     ],
-                //                     "_id": "65d86d23cb5f74939001d514"
-                //                 },
-                //                 "_id": "65d86d23cb5f74939001d512"
-                //             },
-                //             {
-                //                 "type": "Feature",
-                //                 "properties": {
-                //                     "_id": "65d86d23cb5f74939001d516"
-                //                 },
-                //                 "geometry": {
-                //                     "type": "Point",
-                //                     "coordinates": [
-                //                         103.92378673888516,
-                //                         1.3256892676513559
-                //                     ],
-                //                     "_id": "65d86d23cb5f74939001d517"
-                //                 },
-                //                 "_id": "65d86d23cb5f74939001d515"
-                //             },
-                //             {
-                //                 "type": "Feature",
-                //                 "properties": {
-                //                     "_id": "65d86d23cb5f74939001d519"
-                //                 },
-                //                 "geometry": {
-                //                     "type": "Point",
-                //                     "coordinates": [
-                //                         103.92482288836248,
-                //                         1.3250973406445326
-                //                     ],
-                //                     "_id": "65d86d23cb5f74939001d51a"
-                //                 },
-                //                 "_id": "65d86d23cb5f74939001d518"
-                //             }
-                //         ],
-                //         "deletedFeatures": [],
-                //         "_id": "65d86d23cb5f74939001d511",
-                //         "createdAt": "2024-02-23T10:02:11.866Z",
-                //         "updatedAt": "2024-02-23T10:02:11.866Z",
-                //         "__v": 0
-                //     }
-                // }
+                {/*
+                    Sample jsonData
+                    {
+                        "success": true,
+                        "data": {
+                            "title": "Test HDB Layer",
+                            "description": "jus for fun",
+                            "newFeatures": [
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "_id": "65d86d23cb5f74939001d513"
+                                    },
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [
+                                            103.9245885212186,
+                                            1.3260592219579053
+                                        ],
+                                        "_id": "65d86d23cb5f74939001d514"
+                                    },
+                                    "_id": "65d86d23cb5f74939001d512"
+                                },
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "_id": "65d86d23cb5f74939001d516"
+                                    },
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [
+                                            103.92378673888516,
+                                            1.3256892676513559
+                                        ],
+                                        "_id": "65d86d23cb5f74939001d517"
+                                    },
+                                    "_id": "65d86d23cb5f74939001d515"
+                                },
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "_id": "65d86d23cb5f74939001d519"
+                                    },
+                                    "geometry": {
+                                        "type": "Point",
+                                        "coordinates": [
+                                            103.92482288836248,
+                                            1.3250973406445326
+                                        ],
+                                        "_id": "65d86d23cb5f74939001d51a"
+                                    },
+                                    "_id": "65d86d23cb5f74939001d518"
+                                }
+                            ],
+                            "deletedFeatures": [],
+                            "_id": "65d86d23cb5f74939001d511",
+                            "createdAt": "2024-02-23T10:02:11.866Z",
+                            "updatedAt": "2024-02-23T10:02:11.866Z",
+                            "__v": 0
+                        }
+                    }
+                */}
                 return jsonData;
             } else {
                 throw new Error("Invalid dataset creation.")
