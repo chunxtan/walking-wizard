@@ -37,7 +37,7 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
             </span>
 
             <span id="options-slot">
-                <div className='layer-btns'>
+                {/* <div className='layer-btns'>
                     <button
                         onClick={() => onToggle(id, "edit")}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -45,6 +45,22 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                             <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                         </svg>
                     </button>
+                </div> */}
+                <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                    <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                    </svg>
+                </button>
+
+                <div id="dropdown" className="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-25 dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                        <li>
+                            <button onClick={() => onToggle(id, "edit")} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Customise</button>
+                        </li>
+                        <li>
+                            <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete</a>
+                        </li>
+                    </ul>
                 </div>
             </span>
     </li>
