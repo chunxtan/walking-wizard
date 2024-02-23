@@ -49,7 +49,14 @@ export const Map = observer((): React.JSX.Element => {
                 
             })
 
-            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false});
+            let isUserCreatedVal;
+            if (id === parentId) {
+                isUserCreatedVal = false;
+            } else {
+                isUserCreatedVal = true;
+            }
+
+            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal});
         }
 
     }
@@ -97,7 +104,7 @@ export const Map = observer((): React.JSX.Element => {
                     })
         
                     
-                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false});
+                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false, isUserCreated: false });
                 }
             })
 
@@ -184,7 +191,7 @@ export const Map = observer((): React.JSX.Element => {
                         Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} />
                                 ))
                             : null
                         }

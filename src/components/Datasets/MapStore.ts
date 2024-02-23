@@ -5,7 +5,8 @@ import { action, computed, makeObservable, observable } from "mobx";
 export type DatasetLayer = { 
     layerId: string, 
     visibility: 'visible' | 'none',
-    isEditing: boolean 
+    isEditing: boolean,
+    isUserCreated: boolean
 }
 
 export class MapStore {

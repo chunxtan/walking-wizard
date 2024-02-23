@@ -7,9 +7,10 @@ interface LayerToggleProps {
   id: string;
   active: boolean;
   onToggle: (id: string, toggleType: "vis" | "edit") => void;
+  isUserCreated: boolean
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated }) => {
   return (
     <li id="layer-toggle" className='flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group'>
             
@@ -45,7 +46,11 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                         </svg>
                     </button>}>
                     <Dropdown.Item onClick={() => onToggle(id, "edit")}>Customise</Dropdown.Item>
-                    <Dropdown.Item>Delete</Dropdown.Item>
+                    {
+                        isUserCreated
+                        ? <Dropdown.Item>Delete</Dropdown.Item>
+                        : null
+                    }
                 </Dropdown>
             </span>
     </li>
