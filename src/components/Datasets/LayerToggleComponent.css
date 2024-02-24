@@ -19,35 +19,6 @@
     justify-content: left;
     padding-left: 5px;
 }
-    
-/* #menu button {
-    font-size: 8px;
-    color: #404040;
-    margin: 0;
-    padding: 0;
-    padding: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    text-align: center;
-}
-    
-#menu button:last-child {
-    border: none;
-}
-    
-#menu button:hover {
-    background-color: #f8f8f8;
-    color: #404040;
-}
-    
-#menu button.active {
-    background-color: #3887be;
-    color: #ffffff;
-}
-    
-#menu button.active:hover {
-    background: #3074a4;
-} */
 
 .layer-btns {
     display: flex;

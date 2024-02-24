@@ -58,9 +58,16 @@ export const Map = observer((): React.JSX.Element => {
                 backendIdVal = backendId;
             }
 
-            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal, backendId: backendIdVal});
+            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal, backendId: backendIdVal });
         }
 
+    }
+
+    const deleteLayerSource = (id: string): void => {
+        if (map.current) {
+            map.current.removeLayer(id);
+            map.current.removeSource(id);
+        }
     }
 
     useEffect(() => {
@@ -193,7 +200,7 @@ export const Map = observer((): React.JSX.Element => {
                         Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} />
                                 ))
                             : null
                         }
