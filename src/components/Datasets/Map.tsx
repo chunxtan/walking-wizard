@@ -6,18 +6,30 @@ import { preschoolData } from '../../datasets/preschools_bedok';
 import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
-import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 import { Toast } from 'flowbite-react';
 import { HiCheck } from 'react-icons/hi';
+import { LoginUserStore } from '../UserProfile/LoginSignUp/LoginUserStore';
+import { getToken } from '../../util/security';
+import { DATASETID_LOOKUP, CreateDatasetType } from './EditDatasetCard';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+type MapProps = {
+    userStore: LoginUserStore
+}
 
 export type showToastMsg = {
     isShow: boolean;
     toastMsg: string
+}
+
+type ExtgDatasets = CreateDatasetType & {
+    _id: string;
+    userId: string;
 }
 
 // Set up store
@@ -29,7 +41,7 @@ const DATASET_COLOR_LOOKUP: Record<string, string> = {
     "mrt": 'rgb(57, 143, 45)' 
 }
 
-export const Map = observer((): React.JSX.Element => {
+export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
 
@@ -83,6 +95,7 @@ export const Map = observer((): React.JSX.Element => {
     }
 
     useEffect(() => {
+        console.log("mounted: set up map");
         // Set up map
         if (!map.current && mapContainer.current) {
           map.current = new mapboxgl.Map({
@@ -93,43 +106,148 @@ export const Map = observer((): React.JSX.Element => {
           });
 
         if (map.current) {
-            // Load layers 
-            map.current.on('load', () => {
 
-                addSourceLayer("hdb", hdbData, "hdb", "");
+                // Load layers 
+                map.current.on('load', async () => {
 
-                addSourceLayer("preschools", preschoolData, "preschools", "");
+                    addSourceLayer("hdb", hdbData, "hdb", "");
 
-                addSourceLayer("mrt", mrtData, "mrt", "");
+                    addSourceLayer("preschools", preschoolData, "preschools", "");
 
-                // add network
-                if (map.current) {
+                    addSourceLayer("mrt", mrtData, "mrt", "");
 
-                    map.current.addSource("network", {
-                        type: 'geojson',
-                        data: networkData
-                    })
-        
-                    map.current.addLayer({
-                        "id": "network",
-                        "type": "line",
-                        "source": "network",
-                        'layout': {
-                            'visibility': 'visible'
-                        },
-                        'paint': {
-                            'line-color': "rgb(74, 169, 242)",
-                            'line-width': 2
-                        }
+                    // add network
+                    if (map.current) {
+
+                        map.current.addSource("network", {
+                            type: 'geojson',
+                            data: networkData
+                        })
+            
+                        map.current.addLayer({
+                            "id": "network",
+                            "type": "line",
+                            "source": "network",
+                            'layout': {
+                                'visibility': 'visible'
+                            },
+                            'paint': {
+                                'line-color': "rgb(74, 169, 242)",
+                                'line-width': 2
+                            }
+                            
+                        })
                         
-                    })
-        
-                    
-                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false, isUserCreated: false, backendId: "" });
-                }
-            })
+                        mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false, isUserCreated: false, backendId: "" });
+                    }
 
-            mapStore.toggleLayersReady(true);
+                    // if user logged in, check for previously created datasets & add to map
+                    if (userStore.user) {
+                        const userId = userStore.user.userId;
+                        const token = getToken();
+
+                        try {
+                            const res = await fetch(`http://localhost:3000/datasets/show/${userId}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            })
+
+                            if (res.ok) {
+                                const extgDatasets = await res.json();
+                                console.log("extgDatasets: ", extgDatasets);
+                                {/*
+                                SAMPLE EXTG DATASETS:
+                                {
+                                    "datasets": [
+                                        {
+                                            "_id": "65d9aa26b50934d1b8bb4bef",
+                                            "userId": "65d22ee3e6e1e2c29287325d",
+                                            "title": "hdb 3",
+                                            "description": "2024 june launch",
+                                            "parentLayerId": "hdb",
+                                            "newFeatures": [
+                                                {
+                                                    "type": "Feature",
+                                                    "properties": {
+                                                        "_id": "65d9aa26b50934d1b8bb4bf1"
+                                                    },
+                                                    "geometry": {
+                                                        "type": "Point",
+                                                        "coordinates": [
+                                                            103.9287693833511,
+                                                            1.3227589401520987
+                                                        ],
+                                                        "_id": "65d9aa26b50934d1b8bb4bf2"
+                                                    },
+                                                    "_id": "65d9aa26b50934d1b8bb4bf0"
+                                                },
+                                                {
+                                                    "type": "Feature",
+                                                    "properties": {
+                                                        "_id": "65d9aa26b50934d1b8bb4bf4"
+                                                    },
+                                                    "geometry": {
+                                                        "type": "Point",
+                                                        "coordinates": [
+                                                            103.92874801519037,
+                                                            1.3208363173358464
+                                                        ],
+                                                        "_id": "65d9aa26b50934d1b8bb4bf5"
+                                                    },
+                                                    "_id": "65d9aa26b50934d1b8bb4bf3"
+                                                },
+                                                {
+                                                    "type": "Feature",
+                                                    "properties": {
+                                                        "_id": "65d9aa26b50934d1b8bb4bf7"
+                                                    },
+                                                    "geometry": {
+                                                        "type": "Point",
+                                                        "coordinates": [
+                                                            103.93050020444707,
+                                                            1.320003180320171
+                                                        ],
+                                                        "_id": "65d9aa26b50934d1b8bb4bf8"
+                                                    },
+                                                    "_id": "65d9aa26b50934d1b8bb4bf6"
+                                                }
+                                            ],
+                                            "deletedFeatures": [],
+                                            "createdAt": "2024-02-24T08:34:46.444Z",
+                                            "updatedAt": "2024-02-24T08:34:46.444Z",
+                                            "__v": 0
+                                        }
+                                    ]
+                                }
+                                */}
+
+                                if (extgDatasets.datasets.length > 0) {
+                                    extgDatasets.datasets.forEach((dataset: ExtgDatasets) => {
+                                        const parentData = DATASETID_LOOKUP[dataset.parentLayerId];
+                                        let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+                                        if (dataset.newFeatures.length > 0) {
+                                            datasetFeatures = parentData.features.concat(dataset.newFeatures);
+                                        }
+                                        const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
+                                            "type": "FeatureCollection",
+                                            "features": datasetFeatures
+                                        }
+
+                                        addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
+                                    })
+                                }
+                            }
+                        } catch(err) {
+                            console.error(err);
+                        }
+                    }
+                })
+
+                mapStore.toggleLayersReady(true);
+
 
     }}}, []); 
 
@@ -223,7 +341,7 @@ export const Map = observer((): React.JSX.Element => {
                     mapStore.currEditingLayer
                     ? 
                     <div className="sidebar-right">
-                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} />
+                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} />
                     </div>
                     :
                     null

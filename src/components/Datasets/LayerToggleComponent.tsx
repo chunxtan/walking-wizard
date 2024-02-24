@@ -28,10 +28,15 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
 
     const handleDeleteDataset = async () :Promise<void> => {
         try {
+
+            const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+            if (!token) throw new Error('Token not found');
+
             const res = await fetch(`http://localhost:3000/datasets/delete/${backendId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             })
 
