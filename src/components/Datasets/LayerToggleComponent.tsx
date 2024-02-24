@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import "./LayerToggleComponent.css"
 import { observer } from 'mobx-react';
 import { Dropdown } from 'flowbite-react';
@@ -39,16 +39,10 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                 console.log('Dataset deleted.');
 
                 // show toast
-                setShowToast({
-                    isShow: true,
-                    toastMsg: "Dataset successfully deleted."
-                });
+                setShowToast({isShow: true, toastMsg: "Dataset successfully deleted."});
 
                 setTimeout(() => {
-                  setShowToast({
-                    isShow: false,
-                    toastMsg: ""
-                  });
+                  setShowToast({isShow: false, toastMsg: ""});
                 }, 1500);
 
                 // remove from map
