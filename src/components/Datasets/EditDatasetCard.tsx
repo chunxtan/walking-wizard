@@ -60,12 +60,12 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }
     }
 
     const handleAdd = (): void => {
-        const newPoints = mapStore.markers.map((marker) => {
+        const newPoints = mapStore.markers.map((marker, idx) => {
             const {lng, lat} = marker.getLngLat() as LngLat;
             return {
                 "type": "Feature",
                 "properties": {
-                    "Name": "",
+                    "Name": `userGenerated_${idx}`,
                     "Description": "",
                 },
                 "geometry": {
@@ -86,7 +86,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }
             }
 
             console.log("datasetData", datasetData);
-            
+
             const currEditingLayerId = mapStore.currEditingLayer;
             const currData = DATASETID_LOOKUP[currEditingLayerId];
             const newPointDataFeatures = currData.features.concat(newPoints);
