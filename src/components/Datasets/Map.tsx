@@ -256,7 +256,6 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
         if (map.current) {
 
             // check if isEditing is on for any layers
-
             if (mapStore.totalEditingLayers > 1) {
                 throw new Error("More than one layer in editing mode.") 
             }
@@ -271,7 +270,6 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
     
                     // create moveable marker with coords state
                     if (map.current) {
-                        // TODO: make marker draggable
                         const marker = new mapboxgl.Marker()
                             .setLngLat(mapStore.clickCoords)
                             .addTo(map.current)
