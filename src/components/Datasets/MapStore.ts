@@ -7,6 +7,7 @@ export type DatasetLayer = {
     visibility: 'visible' | 'none',
     isEditing: boolean,
     isUserCreated: boolean
+    backendId: string
 }
 
 export class MapStore {

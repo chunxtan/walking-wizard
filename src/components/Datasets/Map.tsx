@@ -26,7 +26,7 @@ export const Map = observer((): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
 
-    const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string = id) => {
+    const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string = id, backendId: string) => {
         if (map.current) {
             map.current.addSource(id, {
                 type: 'geojson',
@@ -49,14 +49,16 @@ export const Map = observer((): React.JSX.Element => {
                 
             })
 
-            let isUserCreatedVal;
+            let isUserCreatedVal, backendIdVal;
             if (id === parentId) {
                 isUserCreatedVal = false;
+                backendIdVal = "";
             } else {
                 isUserCreatedVal = true;
+                backendIdVal = backendId;
             }
 
-            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal});
+            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal, backendId: backendIdVal});
         }
 
     }
@@ -75,11 +77,11 @@ export const Map = observer((): React.JSX.Element => {
             // Load layers 
             map.current.on('load', () => {
 
-                addSourceLayer("hdb", hdbData);
+                addSourceLayer("hdb", hdbData, "hdb", "");
 
-                addSourceLayer("preschools", preschoolData);
+                addSourceLayer("preschools", preschoolData, "preschools", "");
 
-                addSourceLayer("mrt", mrtData);
+                addSourceLayer("mrt", mrtData, "mrt", "");
 
                 // add network
                 if (map.current) {
@@ -104,7 +106,7 @@ export const Map = observer((): React.JSX.Element => {
                     })
         
                     
-                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false, isUserCreated: false });
+                    mapStore.addLayer({ layerId: "network", visibility: 'visible', isEditing: false, isUserCreated: false, backendId: "" });
                 }
             })
 

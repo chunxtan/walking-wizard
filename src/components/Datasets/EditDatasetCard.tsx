@@ -15,7 +15,7 @@ const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometr
 
 type EditDatasetCardProps = {
     mapStore: MapStore,
-    addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string) => void
+    addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string, backendId: string) => void
 }
 
 type SaveFormInput = {
@@ -85,28 +85,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer }: EditDatas
             console.log("dataset POST: ", res);
 
             if (res.ok) {
-                // add new dataset to map
-                // let newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-                if (mapStore.currEditingLayer !== null) {
-                    const currEditingLayerId = mapStore.currEditingLayer;
-                    const currData = DATASETID_LOOKUP[currEditingLayerId];
-                    // const currPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [...currData.features] as Feature<Geometry, GeoJsonProperties>[];
-                    const newPointDataFeatures = currData.features.concat(newPoints);
-                    const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
-                        "type": "FeatureCollection",
-                        "features": newPointDataFeatures
-                    }
-
-                    addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId);
-                } 
-
-
-                // reset form & close card
-                setSaveInput({
-                    title: "",
-                    description: ""
-                });
-                clearMap();
 
                 const jsonData = await res.json();
                 console.log("dataset POST JSON: ", jsonData);
@@ -172,7 +150,29 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer }: EditDatas
                         }
                     }
                 */}
+                // add new dataset to map
+                if (mapStore.currEditingLayer !== null) {
+                    const currEditingLayerId = mapStore.currEditingLayer;
+                    const currData = DATASETID_LOOKUP[currEditingLayerId];
+                    const newPointDataFeatures = currData.features.concat(newPoints);
+                    const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
+                        "type": "FeatureCollection",
+                        "features": newPointDataFeatures
+                    }
+                    const backendId = jsonData.data._id;
+
+                    addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
+                } 
+                
+                // reset form & close card
+                setSaveInput({
+                    title: "",
+                    description: ""
+                });
+                clearMap();
+                
                 return jsonData;
+
             } else {
                 throw new Error("Invalid dataset creation.")
             }
