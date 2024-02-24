@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import "./LayerToggleComponent.css"
 import { observer } from 'mobx-react';
 import { Dropdown } from 'flowbite-react';
-import { Toast } from 'flowbite-react';
-import { HiCheck } from 'react-icons/hi';
 import { MapStore } from './MapStore';
+import { showToastMsg } from './Map';
 
 interface LayerToggleProps {
   id: string;
@@ -14,11 +13,11 @@ interface LayerToggleProps {
   backendId: string;
   mapStore: MapStore;
   deleteLayerSource: (id: string) => void;
+  setShowToast: Dispatch<SetStateAction<showToastMsg>>
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast }) => {
 
-    const [showToast, setShowToast] = useState<boolean>(false);
 
     const getLayerIdx = (): number => {
         const layerIdx = mapStore.layers.findIndex((layer) => {
@@ -40,18 +39,25 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                 console.log('Dataset deleted.');
 
                 // show toast
-                setShowToast(true);
+                setShowToast({
+                    isShow: true,
+                    toastMsg: "Dataset successfully deleted."
+                });
 
                 setTimeout(() => {
-                  setShowToast(false);
-                  // remove from map
-                  deleteLayerSource(id);
-  
-                  // remove from mapStore.layers
-                  const updatedLayers = [...mapStore.layers];
-                  updatedLayers.splice(getLayerIdx(), 1);
-                  mapStore.setLayerProps(updatedLayers);
-                }, 1000);
+                  setShowToast({
+                    isShow: false,
+                    toastMsg: ""
+                  });
+                }, 1500);
+
+                // remove from map
+                deleteLayerSource(id);
+
+                // remove from mapStore.layers
+                const updatedLayers = [...mapStore.layers];
+                updatedLayers.splice(getLayerIdx(), 1);
+                mapStore.setLayerProps(updatedLayers);
 
             }
         } catch(err) {
@@ -102,20 +108,7 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                     </Dropdown>
                 </span>
                 
-                {   
-                    showToast
-                    ?
-                    <div>
-                        <Toast className="transition-opacity fixed flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow bottom-5 left-5 dark:text-gray-400 dark:divide-gray-700 space-x dark:bg-gray-800" role="alert">
-                            <div className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
-                                <HiCheck className="h-3 w-3" />
-                            </div>
-                            <div className="ml-3 text-xs font-normal">Dataset deleted successfully.</div>
-                            <Toast.Toggle />
-                        </Toast>
-                    </div>
-                    : null
-                }
+
         </li>
   );
 });

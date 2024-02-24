@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, LegacyRef } from 'react';
+import React, { useRef, useEffect, LegacyRef, useState } from 'react';
 import mapboxgl, { MapMouseEvent } from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
@@ -10,8 +10,15 @@ import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
+import { Toast } from 'flowbite-react';
+import { HiCheck } from 'react-icons/hi';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+export type showToastMsg = {
+    isShow: boolean;
+    toastMsg: string
+}
 
 // Set up store
 const mapStore = new MapStore();
@@ -25,6 +32,11 @@ const DATASET_COLOR_LOOKUP: Record<string, string> = {
 export const Map = observer((): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
+
+    const [showToast, setShowToast] = useState<showToastMsg>({
+        isShow: false,
+        toastMsg: ""
+    });
 
     const addSourceLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string = id, backendId: string) => {
         if (map.current) {
@@ -200,7 +212,7 @@ export const Map = observer((): React.JSX.Element => {
                         Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} setShowToast={setShowToast} />
                                 ))
                             : null
                         }
@@ -215,6 +227,21 @@ export const Map = observer((): React.JSX.Element => {
                     </div>
                     :
                     null
+                }                
+                
+                {   
+                    showToast.isShow
+                    ?
+                    <div>
+                        <Toast className="transition-opacity fixed flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow bottom-5 left-5 dark:text-gray-400 dark:divide-gray-700 space-x dark:bg-gray-800" role="alert">
+                            <div className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                                <HiCheck className="h-3 w-3" />
+                            </div>
+                            <div className="ml-3 text-xs font-normal">{showToast.toastMsg}</div>
+                            <Toast.Toggle />
+                        </Toast>
+                    </div>
+                    : null
                 }
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
 
