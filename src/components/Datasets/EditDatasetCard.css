@@ -1,0 +1,9 @@
+#feature-tracking {
+    background-color: lightgray;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+#feature-tracking > p {
+    margin-bottom: 0px;
+}

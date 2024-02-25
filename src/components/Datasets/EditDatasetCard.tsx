@@ -8,6 +8,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson
 import { LngLat } from "mapbox-gl";
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
+import './EditDatasetCard.css'
 
 export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
     "hdb": hdbData,
@@ -246,9 +247,19 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }
     return (
         <div className="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <a href="#">
-                <h5 className="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">Customising: {mapStore.currEditingLayer} Layer</h5>
+                <h5 className="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">
+                    Customising: {mapStore.currEditingLayer} Layer
+                </h5>
             </a>
-            <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">{mapStore.markers.length} features added</p>
+
+            <div id="feature-tracking" bg-gray rounded-lg>
+                <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">
+                    {mapStore.markers.length} features added
+                </p>
+                <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">
+                    {mapStore.deletedFeaturesNum} features deleted
+                </p>
+            </div>
 
             <form className="max-w-md mx-auto">
                 <div className="relative z-0 w-full mb-5 group">

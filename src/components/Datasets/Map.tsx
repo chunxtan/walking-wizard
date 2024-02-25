@@ -342,9 +342,8 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                             }, {
                                 isDeleted: true
                             })
-                            const newDeletedFeature = new Map();
-                            newDeletedFeature.set(deleteId, feature);
-                            mapStore.deletedFeatures.push({ id: deleteId, feature: feature });
+                            const newDeletedFeature = { id: deleteId, feature: feature };
+                            mapStore.setDeletedFeatures([...mapStore.deletedFeatures, newDeletedFeature]);
                         }
 
                     }

@@ -49,7 +49,8 @@ export class MapStore {
             totalEditingLayers: computed,
             markersGeoJson: computed,
             markersLngLat: computed,
-            deletedFeaturesId: computed
+            deletedFeaturesId: computed,
+            deletedFeaturesNum: computed
         })
     }
 
@@ -126,6 +127,10 @@ export class MapStore {
     }
 
     get deletedFeaturesId() {
-        return this.deletedFeatures.map(feature => feature.id)
+        return this.deletedFeatures.map(feature => feature.id);
+    }
+
+    get deletedFeaturesNum() {
+        return this.deletedFeatures.length;
     }
 }
