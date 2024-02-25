@@ -11,7 +11,7 @@ export type DatasetLayer = {
     backendId: string
 }
 
-type FeatureId = string | number | undefined
+export type FeatureId = string | number | undefined
 type deletedFeatures = {
     id: FeatureId,
     feature: mapboxgl.MapboxGeoJSONFeature
@@ -50,7 +50,8 @@ export class MapStore {
             markersGeoJson: computed,
             markersLngLat: computed,
             deletedFeaturesId: computed,
-            deletedFeaturesNum: computed
+            deletedFeaturesNum: computed,
+            deletedFeaturesGeoJson: computed
         })
     }
 
@@ -128,6 +129,17 @@ export class MapStore {
 
     get deletedFeaturesId() {
         return this.deletedFeatures.map(feature => feature.id);
+    }
+
+    get deletedFeaturesGeoJson() {
+        return this.deletedFeatures.map((deletedFeature) => {
+            const feature = deletedFeature.feature;
+            return {
+                "type": "Feature",
+                "properties": feature.properties,
+                "geometry": feature.geometry
+            } as Feature<Geometry, GeoJsonProperties>
+        });
     }
 
     get deletedFeaturesNum() {

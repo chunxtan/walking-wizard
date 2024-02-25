@@ -234,7 +234,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                                     extgDatasets.datasets.forEach((dataset: ExtgDatasets) => {
                                         const parentData = DATASETID_LOOKUP[dataset.parentLayerId];
                                         let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
-                                        if (dataset.newFeatures.length > 0) {
+                                        if (dataset.newFeatures) {
                                             datasetFeatures = parentData.features.concat(dataset.newFeatures);
                                         }
                                         const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
@@ -350,7 +350,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 }
             })
         }
-        
     }
 
     const cancelDeletedFeatures = (): void => {

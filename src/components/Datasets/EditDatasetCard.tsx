@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { MapStore } from "./MapStore";
+import { MapStore, FeatureId } from "./MapStore";
 import { useEffect, useState } from "react";
 import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";
@@ -20,10 +20,10 @@ export type CreateDatasetType = {
     title: string;
     description: string;
     parentLayerId: string;
-    newFeatures: Feature<Geometry, GeoJsonProperties>[];
-    deletedFeatures?: string[];
+    newFeatures?: Feature<Geometry, GeoJsonProperties>[];
+    deletedFeatures?: FeatureId[];
 }
-
+ 
 type EditDatasetCardProps = {
     mapStore: MapStore,
     addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string, backendId: string) => void;
@@ -64,28 +64,43 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
     }
 
     const handleAdd = (): void => {
-        const newPoints = mapStore.markersGeoJson;
 
         // add new dataset to map
         if (mapStore.currEditingLayer !== null) {
             const datasetData: CreateDatasetType = {
                 // saveInput
                 ...saveInput, 
+                parentLayerId: mapStore.currEditingLayer,
                 // copy features from geojson of parentLayer
-                newFeatures: newPoints,
-                parentLayerId: mapStore.currEditingLayer
+                ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
+                ...(mapStore.deletedFeatures && { deletedFeatures: mapStore.deletedFeaturesId })
             }
 
             console.log("datasetData", datasetData);
 
             const currEditingLayerId = mapStore.currEditingLayer;
             const currData = DATASETID_LOOKUP[currEditingLayerId];
-            const newPointDataFeatures = currData.features.concat(newPoints);
+            let currPointDataFeatures = currData.features;
+            let newPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+            let featuresToConcat: Feature<Geometry, GeoJsonProperties>[] = [];
+            let featuresToRemove: Feature<Geometry, GeoJsonProperties>[] = [];
+            // add new points if any
+            if (mapStore.markersGeoJson) {
+                featuresToConcat = mapStore.markersGeoJson;
+            } 
+            // remove deleted points if any
+            if (mapStore.deletedFeatures) {
+                featuresToRemove = mapStore.deletedFeaturesGeoJson;
+            }
+            newPointDataFeatures = currPointDataFeatures.filter((feature) => !mapStore.deletedFeaturesGeoJson.includes(feature));
+            newPointDataFeatures = newPointDataFeatures.concat(featuresToConcat);
+
             const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
                 "type": "FeatureCollection",
                 "features": newPointDataFeatures
             }
             const backendId = "";
+            console.log("newGeoJsonData", newGeoJsonData);
 
             addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
         } 
@@ -121,7 +136,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                     "Name": "",
                     "Description": "",
                 },
-                "geometry": {
+                "geometry": { 
                     "type": "Point",
                     "coordinates": [lng, lat]
                 }
@@ -255,7 +270,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 </h5>
             </a>
 
-            <div id="feature-tracking" bg-gray rounded-lg>
+            <div id="feature-tracking">
                 <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">
                     {mapStore.markers.length} features added
                 </p>
