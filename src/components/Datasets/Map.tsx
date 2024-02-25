@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, LegacyRef, useState } from 'react';
-import mapboxgl, { MapLayerMouseEvent, MapMouseEvent } from "mapbox-gl";
+import mapboxgl, { MapLayerMouseEvent } from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import { preschoolData } from '../../datasets/preschools_bedok'; 
@@ -259,85 +259,90 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
 
     // For customising layer
     useEffect(() => {
-        if (map.current) {
-
-            // check if isEditing is on for any layers
-            if (mapStore.totalEditingLayers > 1) {
-                throw new Error("More than one layer in editing mode.") 
-            }
-
-            // Ensures that only single layer in editing mode 
-            else if (mapStore.totalEditingLayers == 1) {
-                const currEditingLayer = mapStore.editingLayers[0].layerId;
-                mapStore.setCurrEditingLayer(currEditingLayer);
-
-                // To delete marker
-                map.current.on('click', (e: MapLayerMouseEvent) => {
-                    // const mouseClick = e.point;
-                    const clickLngLat = e.lngLat;
-                    if (map.current) {
-                        const featuresIdentified = map.current?.queryRenderedFeatures(e.point, {
-                            layers: [currEditingLayer]
-                        });
-
-                        let deleteId;
-                        console.log("deleteId initialised: ", deleteId);
-    
-                        if (featuresIdentified.length == 0) {
-                            console.log("No features for dblclick.");
-
-                            // store click coords in state
-                            mapStore.setClickCoords(e.lngLat);
-
-                            // create moveable marker with coords state
-                            if (map.current) {
-                                const marker = new mapboxgl.Marker()
-                                    .setLngLat(mapStore.clickCoords)
-                                    .addTo(map.current)
-                                mapStore.setMarkers([...mapStore.markers, marker]);
+        // check if isEditing is on for any layers
+        if (mapStore.totalEditingLayers > 1) {
+            throw new Error("More than one layer in editing mode.") 
         }
-                            return
-                        } else {
-                            console.log("Features detected for dblclick.")
-                            console.log("features", e.features);
-                            const feature = featuresIdentified[0];
 
-                            if (deleteId) {
-                                map.current?.removeFeatureState({
-                                    source: currEditingLayer,
-                                    id: deleteId
-                                }, "isDeleted");
-                            }
-    
-                            deleteId = feature.id;
-                            console.log("deleteId assigned:", deleteId);
-    
-                            map.current?.setFeatureState({
-                                source: currEditingLayer,
-                                id: deleteId
-                            }, {
-                                isDeleted: true
-                            })
-    
-                            // check if coord is in marker[] state
-                            if (mapStore.markersLngLat.includes(clickLngLat)) {
-                                const idxToRemove = mapStore.markersLngLat.indexOf(clickLngLat);
-                                const updatedMarkers = [...mapStore.markers];
-                                updatedMarkers.splice(idxToRemove, 1);
-                                mapStore.setMarkers(updatedMarkers);
-                            }
-
-                        }
-                    }
-                })
-            }
-                
-            else {
-                console.log("No layers in editing mode.")
-                return
-            }
+        // Ensures that only single layer in editing mode 
+        else if (mapStore.totalEditingLayers == 1) {
+            enableEditing();
+        }
+            
+        else {
+            console.log("No layers in editing mode.")
+            return
         }
     }, [mapStore.totalEditingLayers])
+
+    const enableEditing = (): void => {
+        if (map.current) {
+            const currEditingLayer = mapStore.editingLayers[0].layerId;
+            mapStore.setCurrEditingLayer(currEditingLayer);
+
+            // To delete marker
+            map.current.on('click', (e: MapLayerMouseEvent) => {
+                // const mouseClick = e.point;
+                const clickLngLat = e.lngLat;
+                if (map.current) {
+                    const featuresIdentified = map.current?.queryRenderedFeatures(e.point, {
+                        layers: [currEditingLayer]
+                    });
+
+                    let deleteId;
+
+                    if (featuresIdentified.length == 0) {
+                        console.log("No features for dblclick.");
+
+                        // check if coord is in marker[] state
+                        if (mapStore.markersLngLat.includes(clickLngLat)) {
+                            const idxToRemove = mapStore.markersLngLat.indexOf(clickLngLat);
+                            // to remove from map
+                            mapStore.markers[idxToRemove].remove();
+                            // to remove from mapStore
+                            const updatedMarkers = [...mapStore.markers];
+                            updatedMarkers.splice(idxToRemove, 1);
+                            mapStore.setMarkers(updatedMarkers);
+                            console.log("Removed existing marker");
+                        }
+
+                        // store click coords in state
+                        mapStore.setClickCoords(e.lngLat);
+
+                        // create moveable marker with coords state
+                        if (map.current) {
+                            const marker = new mapboxgl.Marker()
+                                .setLngLat(mapStore.clickCoords)
+                                .addTo(map.current)
+                            mapStore.setMarkers([...mapStore.markers, marker]);
+                        }
+                        return
+                    } else {
+                        console.log("Features detected for dblclick.")
+                        console.log("features", e.features);
+                        const feature = featuresIdentified[0];
+                        deleteId = feature.id;
+
+                        if (deleteId) {
+                            map.current?.removeFeatureState({
+                                source: currEditingLayer,
+                                id: deleteId
+                            }, "isDeleted");
+                        }
+
+                        map.current?.setFeatureState({
+                            source: currEditingLayer,
+                            id: deleteId
+                        }, {
+                            isDeleted: true
+                        })
+
+                    }
+                }
+            })
+        }
+        
+    }
 
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
