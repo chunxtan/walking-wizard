@@ -11,12 +11,19 @@ export type DatasetLayer = {
     backendId: string
 }
 
+type FeatureId = string | number | undefined
+type deletedFeatures = {
+    id: FeatureId,
+    feature: mapboxgl.MapboxGeoJSONFeature
+}
+
 export class MapStore {
     layers: DatasetLayer[];
     layersReady: boolean;
     clickCoords: LngLat;
     markers: Marker[];
     currEditingLayer: string | null;
+    deletedFeatures: deletedFeatures[];
 
     constructor() {
         this.layers = [];
@@ -24,21 +31,25 @@ export class MapStore {
         this.clickCoords = new LngLat(0, 0);
         this.markers = [];
         this.currEditingLayer = null;
+        this.deletedFeatures = [];
 
         makeObservable(this, {
             layers: observable,
             layersReady: observable,
             markers: observable,
             currEditingLayer: observable,
+            deletedFeatures: observable,
             addLayer: action,
             setLayerProps: action,
             setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
             setCurrEditingLayer: action,
+            setDeletedFeatures: action,
             totalEditingLayers: computed,
             markersGeoJson: computed,
-            markersLngLat: computed
+            markersLngLat: computed,
+            deletedFeaturesId: computed
         })
     }
 
@@ -108,5 +119,13 @@ export class MapStore {
         return this.markers.map((marker) => {
             return marker.getLngLat();
         })
+    }
+
+    setDeletedFeatures(updatedDeletedFeatures: deletedFeatures[]) {
+        this.deletedFeatures = updatedDeletedFeatures;
+    }
+
+    get deletedFeaturesId() {
+        return this.deletedFeatures.map(feature => feature.id)
     }
 }

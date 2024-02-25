@@ -1,5 +1,5 @@
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore"
-import { Map } from "./Map"
+import { MapboxMap } from "./Map"
 
 type DatasetsProps = {
     userStore: LoginUserStore;
@@ -8,7 +8,7 @@ type DatasetsProps = {
 export const Datasets = ({ userStore }: DatasetsProps): React.JSX.Element => {
     return (
         <>
-            <Map userStore={userStore} />
+            <MapboxMap userStore={userStore} />
         </>
     )
 }

@@ -41,7 +41,7 @@ const DATASET_COLOR_LOOKUP: Record<string, string> = {
     "mrt": 'rgb(57, 143, 45)' 
 }
 
-export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
+export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
 
@@ -318,24 +318,34 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
                         }
                         return
                     } else {
-                        console.log("Features detected for dblclick.")
-                        console.log("features", e.features);
                         const feature = featuresIdentified[0];
                         deleteId = feature.id;
+                        console.log("features", deleteId);
 
-                        if (deleteId) {
-                            map.current?.removeFeatureState({
+                        if (mapStore.deletedFeaturesId.includes(deleteId)) {
+                            console.log("Extg deleted feature identified.")
+                            map.current?.setFeatureState({
                                 source: currEditingLayer,
                                 id: deleteId
-                            }, "isDeleted");
-                        }
+                            }, {
+                                isDeleted: false
+                            })
 
-                        map.current?.setFeatureState({
-                            source: currEditingLayer,
-                            id: deleteId
-                        }, {
-                            isDeleted: true
-                        })
+                            const idxToRemove = mapStore.deletedFeaturesId.indexOf(deleteId);
+                            mapStore.deletedFeatures.splice(idxToRemove, 1);
+                            console.log("Removed deleted feature.");
+
+                        } else {
+                            map.current?.setFeatureState({
+                                source: currEditingLayer,
+                                id: deleteId
+                            }, {
+                                isDeleted: true
+                            })
+                            const newDeletedFeature = new Map();
+                            newDeletedFeature.set(deleteId, feature);
+                            mapStore.deletedFeatures.push({ id: deleteId, feature: feature });
+                        }
 
                     }
                 }
