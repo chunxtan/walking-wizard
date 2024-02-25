@@ -1,3 +1,4 @@
+import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { LngLat, Marker } from "mapbox-gl";
 import { action, computed, makeObservable, observable } from "mobx";
 
@@ -31,11 +32,13 @@ export class MapStore {
             currEditingLayer: observable,
             addLayer: action,
             setLayerProps: action,
-            addMarker: action,
+            setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
             setCurrEditingLayer: action,
-            totalEditingLayers: computed
+            totalEditingLayers: computed,
+            markersGeoJson: computed,
+            markersLngLat: computed
         })
     }
 
@@ -71,8 +74,8 @@ export class MapStore {
         this.clickCoords = coords;
     }
 
-    addMarker(newMarker: Marker) {
-        this.markers.push(newMarker);
+    setMarkers(updatedMarkers: Marker[]) {
+        this.markers = updatedMarkers;
     }
 
     clearCoordsMarkers() {
@@ -82,5 +85,28 @@ export class MapStore {
 
     setCurrEditingLayer(id: string | null) {
         this.currEditingLayer = id;
+    }
+
+    get markersGeoJson() {
+        return this.markers.map((marker, idx) => {
+            const {lng, lat} = marker.getLngLat() as LngLat;
+            return {
+                "type": "Feature",
+                "properties": {
+                    "Name": `userGenerated_${idx}`,
+                    "Description": "",
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [lng, lat]
+                }
+            } as Feature<Geometry, GeoJsonProperties>;
+        })
+    }
+
+    get markersLngLat() {
+        return this.markers.map((marker) => {
+            return marker.getLngLat();
+        })
     }
 }

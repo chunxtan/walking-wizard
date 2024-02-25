@@ -20,12 +20,12 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
 
             {/* NavBar Center */}
             <Navbar.Collapse>
-                <Navbar.Link>
+                <Navbar>
                     <Link to="/datasets">Datasets</Link>
-                </Navbar.Link>
-                <Navbar.Link>
+                </Navbar>
+                <Navbar>
                     <a href="#">Scenarios</a>
-                </Navbar.Link>
+                </Navbar>
             </Navbar.Collapse>
 
             {/* NavBar End */}

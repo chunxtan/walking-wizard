@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, LegacyRef, useState } from 'react';
-import mapboxgl, { MapMouseEvent } from "mapbox-gl";
+import mapboxgl, { MapLayerMouseEvent, MapMouseEvent } from "mapbox-gl";
 import './Map.css';
 import { hdbData } from '../../datasets/hdb_bedok_centroid';
 import { preschoolData } from '../../datasets/preschools_bedok'; 
@@ -54,7 +54,8 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
         if (map.current) {
             map.current.addSource(id, {
                 type: 'geojson',
-                data: geoJsonData
+                data: geoJsonData,
+                generateId: true
             })
 
             map.current.addLayer({
@@ -68,7 +69,12 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
                     'circle-radius': 3,
                     'circle-stroke-width': 1,
                     'circle-stroke-color': 'white',
-                    'circle-color': DATASET_COLOR_LOOKUP[parentId]
+                    'circle-color': [
+                        "case",
+                        ["==", ["feature-state", "isDeleted"], true],
+                        "rgba(255, 0, 0, 0.8)", // Color for clicked features
+                        DATASET_COLOR_LOOKUP[parentId] // Default color
+                      ]
                 }
                 
             })
@@ -251,7 +257,7 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
 
     }}}, []); 
 
-    // To add new markers
+    // For customising layer
     useEffect(() => {
         if (map.current) {
 
@@ -262,36 +268,77 @@ export const Map = observer(({ userStore }: MapProps): React.JSX.Element => {
 
             // Ensures that only single layer in editing mode 
             else if (mapStore.totalEditingLayers == 1) {
-            mapStore.setCurrEditingLayer(mapStore.editingLayers[0].layerId);
+                const currEditingLayer = mapStore.editingLayers[0].layerId;
+                mapStore.setCurrEditingLayer(currEditingLayer);
 
-                map.current.on('click', (e: MapMouseEvent) => {
-                    // store click coords in state
-                    mapStore.setClickCoords(e.lngLat);
-    
-                    // create moveable marker with coords state
+                // To delete marker
+                map.current.on('click', (e: MapLayerMouseEvent) => {
+                    // const mouseClick = e.point;
+                    const clickLngLat = e.lngLat;
                     if (map.current) {
-                        const marker = new mapboxgl.Marker()
-                            .setLngLat(mapStore.clickCoords)
-                            .addTo(map.current)
-                        console.log("marker:", marker);
-                        mapStore.addMarker(marker);
+                        const featuresIdentified = map.current?.queryRenderedFeatures(e.point, {
+                            layers: [currEditingLayer]
+                        });
+
+                        let deleteId;
+                        console.log("deleteId initialised: ", deleteId);
+    
+                        if (featuresIdentified.length == 0) {
+                            console.log("No features for dblclick.");
+
+                            // store click coords in state
+                            mapStore.setClickCoords(e.lngLat);
+
+                            // create moveable marker with coords state
+                            if (map.current) {
+                                const marker = new mapboxgl.Marker()
+                                    .setLngLat(mapStore.clickCoords)
+                                    .addTo(map.current)
+                                mapStore.setMarkers([...mapStore.markers, marker]);
+        }
+                            return
+                        } else {
+                            console.log("Features detected for dblclick.")
+                            console.log("features", e.features);
+                            const feature = featuresIdentified[0];
+
+                            if (deleteId) {
+                                map.current?.removeFeatureState({
+                                    source: currEditingLayer,
+                                    id: deleteId
+                                }, "isDeleted");
+                            }
+    
+                            deleteId = feature.id;
+                            console.log("deleteId assigned:", deleteId);
+    
+                            map.current?.setFeatureState({
+                                source: currEditingLayer,
+                                id: deleteId
+                            }, {
+                                isDeleted: true
+                            })
+    
+                            // check if coord is in marker[] state
+                            if (mapStore.markersLngLat.includes(clickLngLat)) {
+                                const idxToRemove = mapStore.markersLngLat.indexOf(clickLngLat);
+                                const updatedMarkers = [...mapStore.markers];
+                                updatedMarkers.splice(idxToRemove, 1);
+                                mapStore.setMarkers(updatedMarkers);
+                            }
+
+                        }
                     }
-                }
-            )}
+                })
+            }
                 
             else {
                 console.log("No layers in editing mode.")
                 return
             }
-
-            // To delete marker
-            map.current.on('dblclick', () => {
-                // check if coord is in marker[] state
-
-                // if yes, remove
-            })
         }
-    }, mapStore.layersReady ? mapStore.layers.map((layer) => layer.isEditing) : [])
+    }, [mapStore.totalEditingLayers])
+
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
       

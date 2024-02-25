@@ -60,20 +60,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }
     }
 
     const handleAdd = (): void => {
-        const newPoints = mapStore.markers.map((marker, idx) => {
-            const {lng, lat} = marker.getLngLat() as LngLat;
-            return {
-                "type": "Feature",
-                "properties": {
-                    "Name": `userGenerated_${idx}`,
-                    "Description": "",
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [lng, lat]
-                }
-            } as Feature<Geometry, GeoJsonProperties>;
-        })
+        const newPoints = mapStore.markersGeoJson;
 
         // add new dataset to map
         if (mapStore.currEditingLayer !== null) {
