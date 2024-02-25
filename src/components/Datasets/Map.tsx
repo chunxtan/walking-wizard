@@ -353,6 +353,18 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         
     }
 
+    const cancelDeletedFeatures = (): void => {
+        mapStore.deletedFeaturesId.forEach((id) => {
+            if (mapStore.currEditingLayer) {
+                map.current?.setFeatureState({
+                    source: mapStore.currEditingLayer,
+                    id: id
+                }, {
+                    isDeleted: false
+                })
+            }
+        })
+    }
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
       
@@ -400,7 +412,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     mapStore.currEditingLayer
                     ? 
                     <div className="sidebar-right">
-                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} />
+                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} />
                     </div>
                     :
                     null

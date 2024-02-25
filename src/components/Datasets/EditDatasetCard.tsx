@@ -27,7 +27,8 @@ export type CreateDatasetType = {
 type EditDatasetCardProps = {
     mapStore: MapStore,
     addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string, backendId: string) => void;
-    userStore: LoginUserStore
+    userStore: LoginUserStore,
+    cancelDeletedFeatures: () => void
 }
 
 type SaveFormInput = {
@@ -35,7 +36,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }: EditDatasetCardProps) : React.JSX.Element => {
+export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures }: EditDatasetCardProps) : React.JSX.Element => {
     const [saveInput, setSaveInput] = useState<SaveFormInput>({
         title: "",
         description: ""
@@ -50,6 +51,8 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore }
     }
 
     const clearMap = (): void => {
+        cancelDeletedFeatures();
+        // clear add changes
         mapStore.setCurrEditingLayer(null);
         mapStore.markers.forEach(marker => marker.remove());
         mapStore.clearCoordsMarkers();
