@@ -68,9 +68,9 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 'paint': {
                     'circle-radius': ['interpolate', ['linear'], ['zoom'], 
                         10, 3, 
-                        10.5, 3,
-                        11, 5,
-                        12, 6
+                        12, 4,
+                        12.25, 5,
+                        12.5, 6
                     ],
                     'circle-stroke-width': 1,
                     'circle-stroke-color': 'white',
