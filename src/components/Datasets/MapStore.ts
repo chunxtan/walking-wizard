@@ -1,5 +1,5 @@
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
-import { LngLat, MapLayerMouseEvent, Marker } from "mapbox-gl";
+import { LngLat, Marker } from "mapbox-gl";
 import { action, computed, makeObservable, observable } from "mobx";
 
 
