@@ -100,10 +100,10 @@ export class MapStore {
         this.currEditingLayer = id;
     }
 
-    get markersGeoJson() {
+    get markersGeoJson(): Feature<Geometry, GeoJsonProperties>[] {
         return this.markers.map((marker, idx) => {
             const {lng, lat} = marker.getLngLat() as LngLat;
-            return {
+            const feature: Feature<Geometry, GeoJsonProperties> = {
                 "type": "Feature",
                 "properties": {
                     "Name": `userGenerated_${idx}`,
@@ -113,7 +113,8 @@ export class MapStore {
                     "type": "Point",
                     "coordinates": [lng, lat]
                 }
-            } as Feature<Geometry, GeoJsonProperties>;
+            };
+            return feature;
         })
     }
 
@@ -131,15 +132,30 @@ export class MapStore {
         return this.deletedFeatures.map(feature => feature.id);
     }
 
-    get deletedFeaturesGeoJson() {
+    get deletedFeaturesGeoJson(): Feature<Geometry, GeoJsonProperties>[] {
         return this.deletedFeatures.map((deletedFeature) => {
             const feature = deletedFeature.feature;
-            return {
+            const output: Feature<Geometry, GeoJsonProperties> = {
                 "type": "Feature",
                 "properties": feature.properties,
                 "geometry": feature.geometry
-            } as Feature<Geometry, GeoJsonProperties>
+            }
+
+            return output;
         });
+    }
+
+    get deletedFeaturesNames(): string[] {
+        return this.deletedFeatures.map((deletedFeature) => {
+            const feature = deletedFeature.feature;
+            let output;
+            if (feature.properties) {
+                output = feature.properties.Name
+            } else {
+                output = ""
+            }
+            return output;
+        })
     }
 
     get deletedFeaturesNum() {

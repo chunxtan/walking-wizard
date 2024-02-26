@@ -16,12 +16,16 @@ export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.
     "mrt": mrtData
 }
 
-export type CreateDatasetType = {
+export type NewDatasetType = {
     title: string;
     description: string;
     parentLayerId: string;
     newFeatures?: Feature<Geometry, GeoJsonProperties>[];
     deletedFeatures?: FeatureId[];
+}
+
+export type CreateDatasetType = NewDatasetType & {
+    userId: string;
 }
  
 type EditDatasetCardProps = {
@@ -63,44 +67,52 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         })))
     }
 
+    const prepSrcData = (currEditingLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> => {
+
+        const currData: FeatureCollection<Geometry, GeoJsonProperties> = DATASETID_LOOKUP[currEditingLayerId];
+        let currPointDataFeatures = currData.features;
+        let newPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+
+        // add new points if any
+        if (!featuresToConcat) {
+            featuresToConcat = [];
+        } 
+        // remove deleted points if any
+        if (featuresToRemove) {
+            // remove points that exist in featuresToRemove arr
+            console.log("featuresToRemove", featuresToRemove)
+            newPointDataFeatures = currPointDataFeatures.filter((feature) => !featuresToRemove.includes(feature.properties?.Name));
+            console.log("newGeoJsonData remove", newPointDataFeatures);
+        }
+        // newPointDataFeatures = currPointDataFeatures.filter((feature) => !featuresToRemove.includes(feature));
+        console.log("newGeoJsonData remove", newPointDataFeatures);
+        newPointDataFeatures = newPointDataFeatures.concat(featuresToConcat);
+        console.log("newGeoJsonData concat", newPointDataFeatures);
+
+        const newGeoJsonData = {
+            "type": "FeatureCollection",
+            "features": newPointDataFeatures
+        } as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+
+        return newGeoJsonData;
+
+    }
+
     const handleAdd = (): void => {
 
         // add new dataset to map
         if (mapStore.currEditingLayer !== null) {
-            const datasetData: CreateDatasetType = {
+            const datasetData: NewDatasetType = {
                 // saveInput
                 ...saveInput, 
                 parentLayerId: mapStore.currEditingLayer,
-                // copy features from geojson of parentLayer
                 ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
                 ...(mapStore.deletedFeatures && { deletedFeatures: mapStore.deletedFeaturesId })
             }
-
-            console.log("datasetData", datasetData);
-
             const currEditingLayerId = mapStore.currEditingLayer;
-            const currData = DATASETID_LOOKUP[currEditingLayerId];
-            let currPointDataFeatures = currData.features;
-            let newPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
-            let featuresToConcat: Feature<Geometry, GeoJsonProperties>[] = [];
-            let featuresToRemove: Feature<Geometry, GeoJsonProperties>[] = [];
-            // add new points if any
-            if (mapStore.markersGeoJson) {
-                featuresToConcat = mapStore.markersGeoJson;
-            } 
-            // remove deleted points if any
-            if (mapStore.deletedFeatures) {
-                featuresToRemove = mapStore.deletedFeaturesGeoJson;
-            }
-            newPointDataFeatures = currPointDataFeatures.filter((feature) => !mapStore.deletedFeaturesGeoJson.includes(feature));
-            newPointDataFeatures = newPointDataFeatures.concat(featuresToConcat);
+            const newGeoJsonData = prepSrcData(currEditingLayerId, datasetData.newFeatures, mapStore.deletedFeaturesNames);
 
-            const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
-                "type": "FeatureCollection",
-                "features": newPointDataFeatures
-            }
             const backendId = "";
-            console.log("newGeoJsonData", newGeoJsonData);
 
             addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
         } 
@@ -117,7 +129,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
     useEffect(() => {
         const token = getToken();
         const payload = token ? JSON.parse(atob(token.split(".")[1])).payload : null;
-        console.log("payload", payload);
         if (payload && payload.userId) {
             setUserId(payload.userId);
         }
@@ -128,137 +139,115 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         const token = localStorage.getItem('token'); 
         if (!token) throw new Error('Token not found');
         
-        const newPoints = mapStore.markers.map((marker) => {
-            const {lng, lat} = marker.getLngLat() as LngLat;
-            return {
-                "type": "Feature",
-                "properties": {
-                    "Name": "",
-                    "Description": "",
-                },
-                "geometry": { 
-                    "type": "Point",
-                    "coordinates": [lng, lat]
-                }
-            } as Feature<Geometry, GeoJsonProperties>;
-        })
+        if (mapStore.currEditingLayer !== null) {
+            const datasetData: CreateDatasetType  = {
+                // saveInput
+                ...saveInput, 
+                userId: userId,
+                parentLayerId: mapStore.currEditingLayer,
+                // copy features from geojson of parentLayer
+                ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
+                ...(mapStore.deletedFeatures && { deletedFeatures: mapStore.deletedFeaturesId })
+            }
 
-        const datasetData = {
-            userId: userId,
-            // saveInput
-            ...saveInput, 
-            // copy features from geojson of parentLayer
-            newFeatures: newPoints,
-            parentLayerId: mapStore.currEditingLayer
-        }
-        console.log("datasetData", datasetData);
-
-        try {
-            // send POST request
-            const res = await fetch("http://localhost:3000/datasets/create", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(datasetData)
-            });
-            console.log("dataset POST: ", res);
-
-            if (res.ok) {
-
-                const jsonData = await res.json();
-                console.log("dataset POST JSON: ", jsonData);
-                {/*
-                    Sample jsonData
-                    {
-                        "success": true,
-                        "data": {
-                            "title": "Test HDB Layer",
-                            "description": "jus for fun",
-                            "newFeatures": [
-                                {
-                                    "type": "Feature",
-                                    "properties": {
-                                        "_id": "65d86d23cb5f74939001d513"
+            try {
+                // send POST request
+                const res = await fetch("http://localhost:3000/datasets/create", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(datasetData)
+                });
+    
+                if (res.ok) {
+    
+                    const jsonData = await res.json();
+                    {/*
+                        Sample jsonData
+                        {
+                            "success": true,
+                            "data": {
+                                "title": "Test HDB Layer",
+                                "description": "jus for fun",
+                                "newFeatures": [
+                                    {
+                                        "type": "Feature",
+                                        "properties": {
+                                            "_id": "65d86d23cb5f74939001d513"
+                                        },
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [
+                                                103.9245885212186,
+                                                1.3260592219579053
+                                            ],
+                                            "_id": "65d86d23cb5f74939001d514"
+                                        },
+                                        "_id": "65d86d23cb5f74939001d512"
                                     },
-                                    "geometry": {
-                                        "type": "Point",
-                                        "coordinates": [
-                                            103.9245885212186,
-                                            1.3260592219579053
-                                        ],
-                                        "_id": "65d86d23cb5f74939001d514"
+                                    {
+                                        "type": "Feature",
+                                        "properties": {
+                                            "_id": "65d86d23cb5f74939001d516"
+                                        },
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [
+                                                103.92378673888516,
+                                                1.3256892676513559
+                                            ],
+                                            "_id": "65d86d23cb5f74939001d517"
+                                        },
+                                        "_id": "65d86d23cb5f74939001d515"
                                     },
-                                    "_id": "65d86d23cb5f74939001d512"
-                                },
-                                {
-                                    "type": "Feature",
-                                    "properties": {
-                                        "_id": "65d86d23cb5f74939001d516"
-                                    },
-                                    "geometry": {
-                                        "type": "Point",
-                                        "coordinates": [
-                                            103.92378673888516,
-                                            1.3256892676513559
-                                        ],
-                                        "_id": "65d86d23cb5f74939001d517"
-                                    },
-                                    "_id": "65d86d23cb5f74939001d515"
-                                },
-                                {
-                                    "type": "Feature",
-                                    "properties": {
-                                        "_id": "65d86d23cb5f74939001d519"
-                                    },
-                                    "geometry": {
-                                        "type": "Point",
-                                        "coordinates": [
-                                            103.92482288836248,
-                                            1.3250973406445326
-                                        ],
-                                        "_id": "65d86d23cb5f74939001d51a"
-                                    },
-                                    "_id": "65d86d23cb5f74939001d518"
-                                }
-                            ],
-                            "deletedFeatures": [],
-                            "_id": "65d86d23cb5f74939001d511",
-                            "createdAt": "2024-02-23T10:02:11.866Z",
-                            "updatedAt": "2024-02-23T10:02:11.866Z",
-                            "__v": 0
+                                    {
+                                        "type": "Feature",
+                                        "properties": {
+                                            "_id": "65d86d23cb5f74939001d519"
+                                        },
+                                        "geometry": {
+                                            "type": "Point",
+                                            "coordinates": [
+                                                103.92482288836248,
+                                                1.3250973406445326
+                                            ],
+                                            "_id": "65d86d23cb5f74939001d51a"
+                                        },
+                                        "_id": "65d86d23cb5f74939001d518"
+                                    }
+                                ],
+                                "deletedFeatures": [],
+                                "_id": "65d86d23cb5f74939001d511",
+                                "createdAt": "2024-02-23T10:02:11.866Z",
+                                "updatedAt": "2024-02-23T10:02:11.866Z",
+                                "__v": 0
+                            }
                         }
-                    }
-                */}
-                // add new dataset to map
-                if (mapStore.currEditingLayer !== null) {
+                    */}
+                    // add new dataset to map
                     const currEditingLayerId = mapStore.currEditingLayer;
-                    const currData = DATASETID_LOOKUP[currEditingLayerId];
-                    const newPointDataFeatures = currData.features.concat(newPoints);
-                    const newGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry> = {
-                        "type": "FeatureCollection",
-                        "features": newPointDataFeatures
-                    }
+                    const newGeoJsonData = prepSrcData(currEditingLayerId, mapStore.markersGeoJson, mapStore.deletedFeaturesNames);
+
                     const backendId = jsonData.data._id;
 
                     addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
-                } 
                 
-                // reset form & close card
-                setSaveInput({
-                    title: "",
-                    description: ""
-                });
-                clearMap();
-                
-                return jsonData;
-
-            } else {
-                throw new Error("Invalid dataset creation.")
+                    
+                    // reset form & close card
+                    setSaveInput({
+                        title: "",
+                        description: ""
+                    });
+                    clearMap();
+    
+                } else {
+                    throw new Error("Invalid dataset creation.")
+                }
+    
+            } catch(err) {
+                console.error(err);
             }
-
-        } catch(err) {
-            console.error(err);
         }
     }
 

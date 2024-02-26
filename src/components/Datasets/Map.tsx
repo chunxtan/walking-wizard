@@ -101,7 +101,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
     }
 
     useEffect(() => {
-        console.log("mounted: set up map");
         // Set up map
         if (!map.current && mapContainer.current) {
           map.current = new mapboxgl.Map({
@@ -163,7 +162,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
                             if (res.ok) {
                                 const extgDatasets = await res.json();
-                                console.log("extgDatasets: ", extgDatasets);
                                 {/*
                                 SAMPLE EXTG DATASETS:
                                 {
@@ -270,7 +268,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         }
             
         else {
-            console.log("No layers in editing mode.")
             return
         }
     }, [mapStore.totalEditingLayers])
@@ -292,7 +289,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     let deleteId;
 
                     if (featuresIdentified.length == 0) {
-                        console.log("No features for dblclick.");
 
                         // check if coord is in marker[] state
                         if (mapStore.markersLngLat.includes(clickLngLat)) {
@@ -303,7 +299,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                             const updatedMarkers = [...mapStore.markers];
                             updatedMarkers.splice(idxToRemove, 1);
                             mapStore.setMarkers(updatedMarkers);
-                            console.log("Removed existing marker");
                         }
 
                         // store click coords in state
@@ -320,10 +315,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     } else {
                         const feature = featuresIdentified[0];
                         deleteId = feature.id;
-                        console.log("features", deleteId);
-
                         if (mapStore.deletedFeaturesId.includes(deleteId)) {
-                            console.log("Extg deleted feature identified.")
                             map.current?.setFeatureState({
                                 source: currEditingLayer,
                                 id: deleteId
@@ -332,8 +324,9 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                             })
 
                             const idxToRemove = mapStore.deletedFeaturesId.indexOf(deleteId);
-                            mapStore.deletedFeatures.splice(idxToRemove, 1);
-                            console.log("Removed deleted feature.");
+                            const newDeletedFeatures = [...mapStore.deletedFeatures];
+                            newDeletedFeatures.splice(idxToRemove, 1);
+                            mapStore.setDeletedFeatures(newDeletedFeatures);
 
                         } else {
                             map.current?.setFeatureState({
@@ -362,7 +355,8 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     isDeleted: false
                 })
             }
-        })
+        });
+        mapStore.deletedFeatures.length = 0;
     }
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
@@ -400,7 +394,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                         Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} setShowToast={setShowToast} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} setShowToast={setShowToast} userStore={userStore} />
                                 ))
                             : null
                         }

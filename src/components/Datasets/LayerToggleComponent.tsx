@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { Dropdown } from 'flowbite-react';
 import { MapStore } from './MapStore';
 import { showToastMsg } from './Map';
+import { LoginUserStore } from '../UserProfile/LoginSignUp/LoginUserStore';
 
 interface LayerToggleProps {
   id: string;
@@ -13,10 +14,11 @@ interface LayerToggleProps {
   backendId: string;
   mapStore: MapStore;
   deleteLayerSource: (id: string) => void;
-  setShowToast: Dispatch<SetStateAction<showToastMsg>>
+  setShowToast: Dispatch<SetStateAction<showToastMsg>>;
+  userStore: LoginUserStore;
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast, userStore }) => {
 
 
     const getLayerIdx = (): number => {
@@ -26,7 +28,26 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
         return layerIdx;
     }
 
-    const handleDeleteDataset = async () :Promise<void> => {
+    const handleDeleteDataset = (): void => {
+
+        // show toast
+        setShowToast({isShow: true, toastMsg: "Dataset successfully deleted."});
+
+        setTimeout(() => {
+          setShowToast({isShow: false, toastMsg: ""});
+        }, 1500);
+
+        // remove from map
+        deleteLayerSource(id);
+
+        // remove from mapStore.layers
+        const updatedLayers = [...mapStore.layers];
+        updatedLayers.splice(getLayerIdx(), 1);
+        mapStore.setLayerProps(updatedLayers);
+
+    }
+
+    const submitDeleteDataset = async () :Promise<void> => {
         try {
 
             const token = localStorage.getItem('token'); // Retrieve the token from localStorage
@@ -42,23 +63,9 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
 
             if (res.ok) {
                 console.log('Dataset deleted.');
-
-                // show toast
-                setShowToast({isShow: true, toastMsg: "Dataset successfully deleted."});
-
-                setTimeout(() => {
-                  setShowToast({isShow: false, toastMsg: ""});
-                }, 1500);
-
-                // remove from map
-                deleteLayerSource(id);
-
-                // remove from mapStore.layers
-                const updatedLayers = [...mapStore.layers];
-                updatedLayers.splice(getLayerIdx(), 1);
-                mapStore.setLayerProps(updatedLayers);
-
+                handleDeleteDataset();
             }
+
         } catch(err) {
             console.error(err);
         }
@@ -101,7 +108,9 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                         <Dropdown.Item onClick={() => onToggle(id, "edit")}>Customise</Dropdown.Item>
                         {
                             isUserCreated
-                            ? <Dropdown.Item onClick={() => handleDeleteDataset()}>Delete</Dropdown.Item>
+                            ? userStore.user 
+                                ? <Dropdown.Item onClick={() => submitDeleteDataset()}>Delete</Dropdown.Item>
+                                : <Dropdown.Item onClick={() => handleDeleteDataset()}>Remove</Dropdown.Item>
                             : null
                         }
                     </Dropdown>
