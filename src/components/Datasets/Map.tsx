@@ -68,7 +68,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 'paint': {
                     'circle-radius': ['interpolate', ['linear'], ['zoom'], 
                         10, 3, 
-                        10.5, 4,
+                        10.5, 3,
                         11, 5,
                         12, 6
                     ],
@@ -347,6 +347,10 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         if (map.current) {
             const currEditingLayer = mapStore.editingLayers[0].layerId;
             mapStore.setCurrEditingLayer(currEditingLayer);
+            // switch off visibility for other layers
+            const nonEditingLayers = mapStore.layerIds.filter(layerId => currEditingLayer !== layerId);
+            nonEditingLayers.forEach(layer => toggleLayer(layer, "vis"));
+
             // To delete marker
             map.current.on('click', enableEditingHandler)
             mapStore.editHandle = enableEditingHandler;

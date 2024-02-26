@@ -89,6 +89,12 @@ export class MapStore {
         return editingLayer.length;
     }
 
+    get layerIds() {
+        return this.layers.map((layer) => {
+            return layer.layerId;
+        })
+    }
+
     setClickCoords(coords: LngLat) {
         this.clickCoords = coords;
     }
