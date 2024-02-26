@@ -1,5 +1,5 @@
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
-import { LngLat, Marker } from "mapbox-gl";
+import { LngLat, MapLayerMouseEvent, Marker } from "mapbox-gl";
 import { action, computed, makeObservable, observable } from "mobx";
 
 
@@ -17,6 +17,10 @@ type deletedFeatures = {
     feature: mapboxgl.MapboxGeoJSONFeature
 }
 
+interface MapEditListener {
+    (ev: mapboxgl.MapMouseEvent & mapboxgl.EventData): void
+  }
+
 export class MapStore {
     layers: DatasetLayer[];
     layersReady: boolean;
@@ -24,6 +28,7 @@ export class MapStore {
     markers: Marker[];
     currEditingLayer: string | null;
     deletedFeatures: deletedFeatures[];
+    editHandle: MapEditListener | null;
 
     constructor() {
         this.layers = [];
@@ -32,6 +37,7 @@ export class MapStore {
         this.markers = [];
         this.currEditingLayer = null;
         this.deletedFeatures = [];
+        this.editHandle = null;
 
         makeObservable(this, {
             layers: observable,

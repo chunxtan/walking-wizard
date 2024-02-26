@@ -20,7 +20,6 @@ interface LayerToggleProps {
 
 const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast, userStore }) => {
 
-
     const getLayerIdx = (): number => {
         const layerIdx = mapStore.layers.findIndex((layer) => {
             layer.layerId === id;

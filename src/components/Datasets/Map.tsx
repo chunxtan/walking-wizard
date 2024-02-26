@@ -252,7 +252,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
                 mapStore.toggleLayersReady(true);
 
-
     }}}, []); 
 
     // For customising layer
@@ -272,76 +271,87 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         }
     }, [mapStore.totalEditingLayers])
 
+    const enableEditingHandler = (e: MapLayerMouseEvent): void => {
+        const clickLngLat = e.lngLat;
+
+        if (map.current && mapStore.currEditingLayer) {
+            const featuresIdentified = map.current?.queryRenderedFeatures(e.point, {
+                layers: [mapStore.currEditingLayer]
+            });
+
+            let deleteId;
+
+            if (featuresIdentified.length == 0) {
+
+                // check if coord is in marker[] state
+                if (mapStore.markersLngLat.includes(clickLngLat)) {
+                    const idxToRemove = mapStore.markersLngLat.indexOf(clickLngLat);
+                    // to remove from map
+                    mapStore.markers[idxToRemove].remove();
+                    // to remove from mapStore
+                    const updatedMarkers = [...mapStore.markers];
+                    updatedMarkers.splice(idxToRemove, 1);
+                    mapStore.setMarkers(updatedMarkers);
+                }
+
+                // store click coords in state
+                mapStore.setClickCoords(e.lngLat);
+
+                // create moveable marker with coords state
+                if (map.current) {
+                    const marker = new mapboxgl.Marker()
+                        .setLngLat(mapStore.clickCoords)
+                        .addTo(map.current)
+                    mapStore.setMarkers([...mapStore.markers, marker]);
+                }
+                return
+            } else {
+                const feature = featuresIdentified[0];
+                deleteId = feature.id;
+                if (mapStore.deletedFeaturesId.includes(deleteId)) {
+                    map.current?.setFeatureState({
+                        source: mapStore.currEditingLayer,
+                        id: deleteId
+                    }, {
+                        isDeleted: false
+                    })
+
+                    const idxToRemove = mapStore.deletedFeaturesId.indexOf(deleteId);
+                    const newDeletedFeatures = [...mapStore.deletedFeatures];
+                    newDeletedFeatures.splice(idxToRemove, 1);
+                    mapStore.setDeletedFeatures(newDeletedFeatures);
+
+                } else {
+                    map.current?.setFeatureState({
+                        source: mapStore.currEditingLayer,
+                        id: deleteId
+                    }, {
+                        isDeleted: true
+                    })
+                    const newDeletedFeature = { id: deleteId, feature: feature };
+                    mapStore.setDeletedFeatures([...mapStore.deletedFeatures, newDeletedFeature]);
+                }
+
+            }
+        }
+        
+    }
+
     const enableEditing = (): void => {
+
         if (map.current) {
             const currEditingLayer = mapStore.editingLayers[0].layerId;
             mapStore.setCurrEditingLayer(currEditingLayer);
-
             // To delete marker
-            map.current.on('click', (e: MapLayerMouseEvent) => {
-                // const mouseClick = e.point;
-                const clickLngLat = e.lngLat;
-                if (map.current) {
-                    const featuresIdentified = map.current?.queryRenderedFeatures(e.point, {
-                        layers: [currEditingLayer]
-                    });
+            map.current.on('click', enableEditingHandler)
+            mapStore.editHandle = enableEditingHandler;
+        }
+    }
 
-                    let deleteId;
-
-                    if (featuresIdentified.length == 0) {
-
-                        // check if coord is in marker[] state
-                        if (mapStore.markersLngLat.includes(clickLngLat)) {
-                            const idxToRemove = mapStore.markersLngLat.indexOf(clickLngLat);
-                            // to remove from map
-                            mapStore.markers[idxToRemove].remove();
-                            // to remove from mapStore
-                            const updatedMarkers = [...mapStore.markers];
-                            updatedMarkers.splice(idxToRemove, 1);
-                            mapStore.setMarkers(updatedMarkers);
-                        }
-
-                        // store click coords in state
-                        mapStore.setClickCoords(e.lngLat);
-
-                        // create moveable marker with coords state
-                        if (map.current) {
-                            const marker = new mapboxgl.Marker()
-                                .setLngLat(mapStore.clickCoords)
-                                .addTo(map.current)
-                            mapStore.setMarkers([...mapStore.markers, marker]);
-                        }
-                        return
-                    } else {
-                        const feature = featuresIdentified[0];
-                        deleteId = feature.id;
-                        if (mapStore.deletedFeaturesId.includes(deleteId)) {
-                            map.current?.setFeatureState({
-                                source: currEditingLayer,
-                                id: deleteId
-                            }, {
-                                isDeleted: false
-                            })
-
-                            const idxToRemove = mapStore.deletedFeaturesId.indexOf(deleteId);
-                            const newDeletedFeatures = [...mapStore.deletedFeatures];
-                            newDeletedFeatures.splice(idxToRemove, 1);
-                            mapStore.setDeletedFeatures(newDeletedFeatures);
-
-                        } else {
-                            map.current?.setFeatureState({
-                                source: currEditingLayer,
-                                id: deleteId
-                            }, {
-                                isDeleted: true
-                            })
-                            const newDeletedFeature = { id: deleteId, feature: feature };
-                            mapStore.setDeletedFeatures([...mapStore.deletedFeatures, newDeletedFeature]);
-                        }
-
-                    }
-                }
-            })
+    const disableEditing = (): void => {
+        if (map.current && mapStore.editHandle) {
+            map.current.off('click', mapStore.editHandle);
+            mapStore.editHandle = null;
         }
     }
 
@@ -356,7 +366,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 })
             }
         });
-        mapStore.deletedFeatures.length = 0;
+        mapStore.setDeletedFeatures([]);
     }
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {
@@ -405,7 +415,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     mapStore.currEditingLayer
                     ? 
                     <div className="sidebar-right">
-                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} />
+                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} />
                     </div>
                     :
                     null

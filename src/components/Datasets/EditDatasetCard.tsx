@@ -5,7 +5,6 @@ import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";
 import { mrtData } from "../../datasets/mrt_bedok_centroid";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
-import { LngLat } from "mapbox-gl";
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
 import './EditDatasetCard.css'
@@ -32,7 +31,8 @@ type EditDatasetCardProps = {
     mapStore: MapStore,
     addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string, backendId: string) => void;
     userStore: LoginUserStore,
-    cancelDeletedFeatures: () => void
+    cancelDeletedFeatures: () => void,
+    disableEditing: () => void
 }
 
 type SaveFormInput = {
@@ -40,7 +40,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures }: EditDatasetCardProps) : React.JSX.Element => {
+export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures, disableEditing }: EditDatasetCardProps) : React.JSX.Element => {
     const [saveInput, setSaveInput] = useState<SaveFormInput>({
         title: "",
         description: ""
@@ -65,6 +65,8 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
             ...layer,
             isEditing: false,
         })))
+
+        disableEditing();
     }
 
     const prepSrcData = (currEditingLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> => {
@@ -80,14 +82,9 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         // remove deleted points if any
         if (featuresToRemove) {
             // remove points that exist in featuresToRemove arr
-            console.log("featuresToRemove", featuresToRemove)
             newPointDataFeatures = currPointDataFeatures.filter((feature) => !featuresToRemove.includes(feature.properties?.Name));
-            console.log("newGeoJsonData remove", newPointDataFeatures);
         }
-        // newPointDataFeatures = currPointDataFeatures.filter((feature) => !featuresToRemove.includes(feature));
-        console.log("newGeoJsonData remove", newPointDataFeatures);
         newPointDataFeatures = newPointDataFeatures.concat(featuresToConcat);
-        console.log("newGeoJsonData concat", newPointDataFeatures);
 
         const newGeoJsonData = {
             "type": "FeatureCollection",
