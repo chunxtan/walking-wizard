@@ -7,7 +7,7 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { FeatureId, MapStore } from './MapStore';
+import { DatasetLayer, FeatureId, MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 import { Toast } from 'flowbite-react';
@@ -355,8 +355,17 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
             const currEditingLayer = mapStore.editingLayers[0].layerId;
             mapStore.setCurrEditingLayer(currEditingLayer);
             // switch off visibility for other layers
-            const nonEditingLayers = mapStore.layerIds.filter(layerId => currEditingLayer !== layerId);
-            nonEditingLayers.forEach(layer => toggleLayer(layer, "vis"));
+            const updatedVisLayers: DatasetLayer[] = mapStore.layers.map(layer => {
+        
+                if (layer.layerId === currEditingLayer) {
+                    map.current?.setLayoutProperty(layer.layerId, "visibility", "visible");
+                    return { ...layer, visibility: "visible" }
+                } else {
+                    map.current?.setLayoutProperty(layer.layerId, "visibility", "none");
+                    return { ...layer, visibility: "none" }
+                }
+            });
+            mapStore.setLayerProps(updatedVisLayers);
 
             // To delete marker
             map.current.on('click', enableEditingHandler)
