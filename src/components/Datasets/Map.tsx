@@ -7,7 +7,7 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { MapStore } from './MapStore';
+import { FeatureId, MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 import { Toast } from 'flowbite-react';
@@ -29,7 +29,6 @@ export type showToastMsg = {
 
 type ExtgDatasets = CreateDatasetType & {
     _id: string;
-    userId: string;
 }
 
 // Set up store
@@ -84,16 +83,18 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 
             })
 
-            let isUserCreatedVal, backendIdVal;
+            let isUserCreatedVal, backendIdVal, parentLayerId;
             if (id === parentId) {
                 isUserCreatedVal = false;
                 backendIdVal = "";
             } else {
                 isUserCreatedVal = true;
                 backendIdVal = backendId;
+                parentLayerId = parentId;
             }
 
-            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal, backendId: backendIdVal });
+            mapStore.addLayer({ layerId: id, visibility: 'visible', isEditing: false, isUserCreated: isUserCreatedVal, backendId: backendIdVal, parentLayerId: parentLayerId !== undefined ? parentLayerId : undefined });
+            
         }
 
     }
@@ -246,6 +247,12 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                                         }
 
                                         addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
+                                        mapStore.addUserCreatedBackendLayers({
+                                            layerId: dataset.title,
+                                            description: dataset.description,
+                                            newFeatures: dataset.newFeatures,
+                                            deletedFeatures: dataset.deletedFeatures
+                                        })
                                     })
                                 }
                             }

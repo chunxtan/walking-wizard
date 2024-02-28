@@ -6,9 +6,17 @@ import { action, computed, makeObservable, observable } from "mobx";
 export type DatasetLayer = { 
     layerId: string, 
     visibility: 'visible' | 'none',
+    parentLayerId?: string,
     isEditing: boolean,
     isUserCreated: boolean
     backendId: string
+}
+
+export type UserCreatedDatasetLayer = {
+    layerId: string,
+    description: string,
+    newFeatures: Feature<Geometry, GeoJsonProperties>[],
+    deletedFeatures: FeatureId[]
 }
 
 export type FeatureId = string | number | undefined
@@ -23,6 +31,7 @@ interface MapEditListener {
 
 export class MapStore {
     layers: DatasetLayer[];
+    userCreatedBackendLayers: UserCreatedDatasetLayer[];
     layersReady: boolean;
     clickCoords: LngLat;
     markers: Marker[];
@@ -32,6 +41,7 @@ export class MapStore {
 
     constructor() {
         this.layers = [];
+        this.userCreatedBackendLayers = [];
         this.layersReady = false;
         this.clickCoords = new LngLat(0, 0);
         this.markers = [];
@@ -45,8 +55,10 @@ export class MapStore {
             markers: observable,
             currEditingLayer: observable,
             deletedFeatures: observable,
+            userCreatedBackendLayers: observable,
             addLayer: action,
             setLayerProps: action,
+            setUserCreatedBackendLayers: action,
             setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
@@ -68,6 +80,14 @@ export class MapStore {
     setLayerProps(updatedLayers: DatasetLayer[]) {
         this.layers = updatedLayers;
     } 
+
+    addUserCreatedBackendLayers(newLayer: UserCreatedDatasetLayer) {
+        this.userCreatedBackendLayers.push(newLayer);
+    }
+
+    setUserCreatedBackendLayers(updatedLayers: UserCreatedDatasetLayer[]) {
+        this.userCreatedBackendLayers = updatedLayers;
+    }
 
     toggleLayersReady(val: boolean) {
         this.layersReady = val;
@@ -172,5 +192,11 @@ export class MapStore {
 
     get deletedFeaturesNum() {
         return this.deletedFeatures.length;
+    }
+
+    get isCurrEditingLayerUserCreated(): boolean {
+        const layerIdx = this.layers.findIndex(layer => layer.layerId === this.currEditingLayer);
+        const currLayer = this.layers[layerIdx];
+        return currLayer.isUserCreated;
     }
 }

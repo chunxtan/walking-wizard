@@ -104,7 +104,12 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                             <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
                             </svg>
                         </button>}>
-                        <Dropdown.Item onClick={() => onToggle(id, "edit")}>Customise</Dropdown.Item>
+                        {
+                            isUserCreated
+                            ? <Dropdown.Item onClick={() => onToggle(id, "edit")}>Edit</Dropdown.Item>
+                            : <Dropdown.Item onClick={() => onToggle(id, "edit")}>Customise</Dropdown.Item>
+                        }
+                        
                         {
                             isUserCreated
                             ? userStore.user 

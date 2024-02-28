@@ -19,8 +19,8 @@ export type NewDatasetType = {
     title: string;
     description: string;
     parentLayerId: string;
-    newFeatures?: Feature<Geometry, GeoJsonProperties>[];
-    deletedFeatures?: FeatureId[];
+    newFeatures: Feature<Geometry, GeoJsonProperties>[];
+    deletedFeatures: FeatureId[];
 }
 
 export type CreateDatasetType = NewDatasetType & {
@@ -160,64 +160,62 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 if (res.ok) {
     
                     const jsonData = await res.json();
+                    console.log("create jsonData:", jsonData);
                     {/*
                         Sample jsonData
                         {
                             "success": true,
                             "data": {
-                                "title": "Test HDB Layer",
-                                "description": "jus for fun",
+                                "userId": "65d22ee3e6e1e2c29287325d",
+                                "title": "sers",
+                                "description": "sers",
+                                "parentLayerId": "hdb",
                                 "newFeatures": [
                                     {
                                         "type": "Feature",
-                                        "properties": {
-                                            "_id": "65d86d23cb5f74939001d513"
-                                        },
                                         "geometry": {
                                             "type": "Point",
                                             "coordinates": [
-                                                103.9245885212186,
-                                                1.3260592219579053
-                                            ],
-                                            "_id": "65d86d23cb5f74939001d514"
+                                                103.93032199998504,
+                                                1.322369016703135
+                                            ]
                                         },
-                                        "_id": "65d86d23cb5f74939001d512"
+                                        "_id": "65ddf432cf0d681dd363338a"
                                     },
                                     {
                                         "type": "Feature",
-                                        "properties": {
-                                            "_id": "65d86d23cb5f74939001d516"
-                                        },
                                         "geometry": {
                                             "type": "Point",
                                             "coordinates": [
-                                                103.92378673888516,
-                                                1.3256892676513559
-                                            ],
-                                            "_id": "65d86d23cb5f74939001d517"
+                                                103.92964839742825,
+                                                1.3202569158915196
+                                            ]
                                         },
-                                        "_id": "65d86d23cb5f74939001d515"
+                                        "_id": "65ddf432cf0d681dd363338b"
                                     },
                                     {
                                         "type": "Feature",
-                                        "properties": {
-                                            "_id": "65d86d23cb5f74939001d519"
-                                        },
                                         "geometry": {
                                             "type": "Point",
                                             "coordinates": [
-                                                103.92482288836248,
-                                                1.3250973406445326
-                                            ],
-                                            "_id": "65d86d23cb5f74939001d51a"
+                                                103.93075065615983,
+                                                1.3197365429513042
+                                            ]
                                         },
-                                        "_id": "65d86d23cb5f74939001d518"
+                                        "_id": "65ddf432cf0d681dd363338c"
                                     }
                                 ],
-                                "deletedFeatures": [],
-                                "_id": "65d86d23cb5f74939001d511",
-                                "createdAt": "2024-02-23T10:02:11.866Z",
-                                "updatedAt": "2024-02-23T10:02:11.866Z",
+                                "deletedFeatures": [
+                                    "528",
+                                    "465",
+                                    "561",
+                                    "193",
+                                    "111",
+                                    "364"
+                                ],
+                                "_id": "65ddf432cf0d681dd3633389",
+                                "createdAt": "2024-02-27T14:39:46.854Z",
+                                "updatedAt": "2024-02-27T14:39:46.854Z",
                                 "__v": 0
                             }
                         }
@@ -278,8 +276,14 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 {
                     userStore.user
                     ? 
+                    mapStore.isCurrEditingLayerUserCreated
+                    ? 
                     <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-                        Save
+                        Update
+                    </button>   
+                    :
+                    <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                        Create 
                     </button>   
                     :
                     <button id="nonlogin-save" onClick={() => handleAdd()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
