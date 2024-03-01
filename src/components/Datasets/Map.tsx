@@ -399,8 +399,8 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
     }
 
     const disablePopup = (): void => {
-        if (map.current) {
-            map.current.off('click', enablePopupHandler);
+        if (map.current && mapStore.popupHandle) {
+            map.current.off('click', mapStore.popupHandle);
             mapStore.popupHandle = null;
             mapStore.popup = null;
         }
