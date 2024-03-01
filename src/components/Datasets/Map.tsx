@@ -406,7 +406,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         }
     }
 
-
     const enableEditing = (): void => {
 
         if (map.current) {
@@ -478,6 +477,13 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
       
           mapStore.setLayerProps(updatedLayers);
     };
+
+    const getGeoJsonData = (id: string): FeatureCollection<Geometry, GeoJsonProperties> | undefined => {
+        if (map.current) {
+            // @ts-ignore
+            const geoJsonData = map.current.getSource(id)._data
+            return geoJsonData;
+    }}
   
     return (
         <div>
@@ -487,7 +493,16 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                         Datasets
                         { mapStore.layersReady
                             ? mapStore.layers.map((layer) => (
-                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} active={layer.visibility === 'visible'} onToggle={toggleLayer} isUserCreated={layer.isUserCreated} backendId={layer.backendId} mapStore={mapStore} deleteLayerSource={deleteLayerSource} setShowToast={setShowToast} userStore={userStore} />
+                                    <LayerToggleComponent key={layer.layerId} id={layer.layerId} 
+                                        active={layer.visibility === 'visible'} 
+                                        onToggle={toggleLayer} 
+                                        isUserCreated={layer.isUserCreated} 
+                                        backendId={layer.backendId} 
+                                        mapStore={mapStore} 
+                                        deleteLayerSource={deleteLayerSource} 
+                                        setShowToast={setShowToast} 
+                                        userStore={userStore}
+                                        getGeoJsonData={getGeoJsonData} />
                                 ))
                             : null
                         }

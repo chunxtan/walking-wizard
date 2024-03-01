@@ -5,6 +5,7 @@ import { Dropdown } from 'flowbite-react';
 import { MapStore } from './MapStore';
 import { showToastMsg } from './Map';
 import { LoginUserStore } from '../UserProfile/LoginSignUp/LoginUserStore';
+import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 
 interface LayerToggleProps {
   id: string;
@@ -16,9 +17,10 @@ interface LayerToggleProps {
   deleteLayerSource: (id: string) => void;
   setShowToast: Dispatch<SetStateAction<showToastMsg>>;
   userStore: LoginUserStore;
+  getGeoJsonData: (id: string) => FeatureCollection<Geometry, GeoJsonProperties> | undefined
 }
 
-const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast, userStore }) => {
+const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active, onToggle, isUserCreated, backendId, mapStore, deleteLayerSource, setShowToast, userStore, getGeoJsonData }) => {
 
     const getLayerIdx = (): number => {
         const layerIdx = mapStore.layers.findIndex((layer) => {
@@ -70,6 +72,25 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
         }
     }
 
+    const downloadDataset = (id: string): void => {
+        const geojsonData = getGeoJsonData(id);
+
+        // Create a Blob object with the GeoJSON data
+        const blob = new Blob([JSON.stringify(geojsonData, null, 2)], { type: 'application/json' });
+      
+        // Create a downloadable URL for the Blob
+        const url = URL.createObjectURL(blob);
+      
+        // Simulate a click on a hidden anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'data.geojson'; // Set the desired filename
+        link.click();
+      
+        // Revoke the object URL to avoid memory leaks
+        URL.revokeObjectURL(url);
+    }
+
     return (
         <li id="layer-toggle" className='flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group'>
                 
@@ -117,6 +138,7 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
                                 : <Dropdown.Item onClick={() => handleDeleteDataset()}>Remove</Dropdown.Item>
                             : null
                         }
+                        <Dropdown.Item onClick={() => downloadDataset(id)}>Download</Dropdown.Item>
                     </Dropdown>
                 </span>
                 
