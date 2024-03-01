@@ -69,7 +69,6 @@ export class MapStore {
             addLayer: action,
             setLayerProps: action,
             setUserCreatedBackendLayers: action,
-            // addUserCreatedBackendLayers: action,
             setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
@@ -91,10 +90,6 @@ export class MapStore {
     setLayerProps(updatedLayers: DatasetLayer[]) {
         this.layers = updatedLayers;
     } 
-
-    // addUserCreatedBackendLayers(newLayer: UserCreatedDatasetLayer) {
-    //     this.userCreatedBackendLayers.push(newLayer);
-    // }
 
     setUserCreatedBackendLayers(updatedLayers: UserCreatedDatasetLayer[]) {
         this.userCreatedBackendLayers = updatedLayers;

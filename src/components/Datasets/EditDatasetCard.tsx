@@ -8,7 +8,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
 import './EditDatasetCard.css'
-import { Button, Spinner } from 'flowbite-react';
+import { Button } from 'flowbite-react';
 
 export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
     "hdb": hdbData,
@@ -250,13 +250,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                         _id: backendId
                     }
                     mapStore.setUserCreatedBackendLayers([...mapStore.userCreatedBackendLayers, newBackendLayer]);
-                    // mapStore.addUserCreatedBackendLayers({
-                    //     layerId: saveInput.title,
-                    //     description: saveInput.description,
-                    //     newFeatures: mapStore.markersGeoJson,
-                    //     deletedFeatures: mapStore.deletedFeaturesGeoJson,
-                    //     _id: backendId
-                    // })
 
                     setIsLoading(false);
 
@@ -309,8 +302,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                     ? 
                         isLoading 
                         ?
-                        <Button className="bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300 disabled">
-                            <Spinner aria-label="Spinner button example" size="sm" />
+                        <Button className="bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300" isProcessing>
                             <span className="pl-3">Loading...</span>
                         </Button>
                         :
