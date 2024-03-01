@@ -84,7 +84,7 @@ const LayerToggleComponent: React.FC<LayerToggleProps> = observer(({ id, active,
         // Simulate a click on a hidden anchor element to trigger download
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'data.geojson'; // Set the desired filename
+        link.download = `${id}_data.geojson`; // Set the desired filename
         link.click();
       
         // Revoke the object URL to avoid memory leaks

@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { Avatar, Button, Dropdown, Navbar } from 'flowbite-react';
 import './NavBar.css'
 import '@fontsource-variable/azeret-mono';
-import '@fontsource/monofett';
+import '@fontsource/silkscreen';
 
 type NavBarProps = {
     userStore: LoginUserStore
@@ -40,7 +40,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
                         arrowIcon={false}
                         inline
                         label={
-                            <Avatar alt="User settings" img="https://st4.depositphotos.com/9421792/31313/v/1600/depositphotos_313135282-stock-illustration-smiley-face-happy-smiley-emoji.jpg" rounded />
+                            <Avatar alt="User settings" img="https://webgradients.com/public/webgradients_png/016%20Deep%20Blue.png" rounded />
                         }
                         >
                         <Dropdown.Header>
