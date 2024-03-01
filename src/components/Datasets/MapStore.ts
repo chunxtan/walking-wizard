@@ -1,4 +1,4 @@
-import { Feature, Geometry, GeoJsonProperties, FeatureCollection } from "geojson";
+import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { LngLat, Marker } from "mapbox-gl";
 import { action, computed, makeObservable, observable } from "mobx";
 

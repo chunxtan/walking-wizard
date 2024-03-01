@@ -8,6 +8,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
 import './EditDatasetCard.css'
+import { Button, Spinner } from "flowbite-react";
 
 export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
     "hdb": hdbData,
@@ -54,6 +55,7 @@ type SaveFormInput = {
 export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, disableEditing, updateLayerSource, enablePopup }: EditExtgDatasetCardProps) : React.JSX.Element => {
     const [updateInput, setUpdateInput] = useState<SaveFormInput>(mapStore.currEditingExtngLayerUpdateInput);   
     const [userId, setUserId] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     
     const handleInputChange = (evt: React.FormEvent<HTMLInputElement>) => {
         setUpdateInput({
@@ -115,6 +117,7 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
     }, []);
 
     const handleUpdate = async () => {
+        setIsLoading(true);
 
         const token = localStorage.getItem('token'); 
         if (!token) throw new Error('Token not found');
@@ -191,7 +194,7 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
                         mapStore.setUserCreatedBackendLayers(newCreatedBackendLayers);
                     }
                 }
-        
+                setIsLoading(false);
                 // reset form & close card
                 setUpdateInput({
                     title: "",
@@ -233,6 +236,13 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
 
             <div className="flex mt-4 md:mt-6">
                 {
+                    isLoading 
+                    ?
+                    <Button className="bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300 disabled">
+                        <Spinner aria-label="Spinner button example" size="sm" />
+                        <span className="pl-3">Loading...</span>
+                    </Button>
+                    :
                     <button id="login-save" onClick={() => handleUpdate()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                         Update
                     </button>                 

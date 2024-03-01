@@ -8,6 +8,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from "geojson
 import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
 import './EditDatasetCard.css'
+import { Button, Spinner } from 'flowbite-react';
 
 export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
     "hdb": hdbData,
@@ -55,6 +56,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         description: ""
     })    
     const [userId, setUserId] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     
     const handleInputChange = (evt: React.FormEvent<HTMLInputElement>) => {
         setSaveInput({
@@ -142,6 +144,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
     }, []);
 
     const handleSubmit = async () => {
+        setIsLoading(true);
 
         const token = localStorage.getItem('token'); 
         if (!token) throw new Error('Token not found');
@@ -246,7 +249,8 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                         _id: backendId
                     })
 
-                    
+                    setIsLoading(false);
+
                     // reset form & close card
                     setSaveInput({
                         title: "",
@@ -294,9 +298,16 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 {
                     userStore.user
                     ? 
-                    <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-                        Create 
-                    </button>   
+                        isLoading 
+                        ?
+                        <Button className="bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300 disabled">
+                            <Spinner aria-label="Spinner button example" size="sm" />
+                            <span className="pl-3">Loading...</span>
+                        </Button>
+                        :
+                        <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                            Create 
+                        </button>   
                     :
                     <button id="nonlogin-save" onClick={() => handleAdd()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                         Add
