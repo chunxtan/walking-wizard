@@ -20,17 +20,17 @@ export const HomePage = (): React.JSX.Element => {
         { 
             title: "Customise base datasets", 
             description: "Add new features or remove existing ones. Logged-in users will have their datasets saved.",
-            image: "src/assets/images/editDatasets.png"
+            image: "/editDatasets.png"
         },
         { 
             title: "Choose your own scenario", 
             description: "Mix and match datasets for your analysis scenario - choose from both base and customised datasets.",
-            image: "src/assets/images/chooseDatasets.png" 
+            image: "/chooseDatasets.png" 
         },
         { 
             title: "Get insightful results", 
             description: "Assess the accessibility of homes to key amenities within walking distance.",
-            image: "src/assets/images/runAnalysis.png" 
+            image: "/runAnalysis.png" 
         }
     ]
     return (
