@@ -241,13 +241,22 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
 
                     addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
 
-                    mapStore.addUserCreatedBackendLayers({
+
+                    const newBackendLayer = {
                         layerId: saveInput.title,
                         description: saveInput.description,
                         newFeatures: mapStore.markersGeoJson,
                         deletedFeatures: mapStore.deletedFeaturesGeoJson,
                         _id: backendId
-                    })
+                    }
+                    mapStore.setUserCreatedBackendLayers([...mapStore.userCreatedBackendLayers, newBackendLayer]);
+                    // mapStore.addUserCreatedBackendLayers({
+                    //     layerId: saveInput.title,
+                    //     description: saveInput.description,
+                    //     newFeatures: mapStore.markersGeoJson,
+                    //     deletedFeatures: mapStore.deletedFeaturesGeoJson,
+                    //     _id: backendId
+                    // })
 
                     setIsLoading(false);
 

@@ -86,6 +86,7 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
         if (currData) {
             let currPointDataFeatures = currData.features;
             let newPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+            console.log("currData", currPointDataFeatures);
     
             // add new points if any
             if (!featuresToConcat) {
@@ -95,8 +96,10 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
             if (featuresToRemove) {
                 // remove points that exist in featuresToRemove arr
                 newPointDataFeatures = currPointDataFeatures.filter((feature) => !featuresToRemove.includes(feature.properties?.Name));
+                console.log("currData removed", newPointDataFeatures);
             }
             newPointDataFeatures = newPointDataFeatures.concat(featuresToConcat);
+            console.log("currData concat", newPointDataFeatures);
     
             const newGeoJsonData = {
                 "type": "FeatureCollection",
@@ -123,20 +126,15 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
         if (!token) throw new Error('Token not found');
 
         // process for changes in user edits
-        let updatedNewFeatures: Feature<Geometry, GeoJsonProperties>[] = mapStore.userCreatedBackendLayersNewFeatures.concat(mapStore.markersGeoJson);
         const backendLayerIdx = mapStore.userCreatedBackendLayers.findIndex(layer => layer.layerId === mapStore.currEditingLayer);
+        const backendLayerNewFeatures = mapStore.userCreatedBackendLayers[backendLayerIdx].newFeatures;
+        let updatedNewFeatures: Feature<Geometry, GeoJsonProperties>[] = backendLayerNewFeatures.concat(mapStore.markersGeoJson);
         const backendLayerDelFeatures = mapStore.userCreatedBackendLayers[backendLayerIdx].deletedFeatures;
         const updatedDeletedFeatures: Feature<Geometry, GeoJsonProperties>[] = backendLayerDelFeatures.concat(mapStore.deletedFeaturesGeoJson);
-        console.log("updatedNewFeatures1", updatedNewFeatures)
-        // console.log("backendLayerDelFeatures", backendLayerDelFeatures)
-        // console.log("mapStoreDeletedFeaturesJson", mapStore.deletedFeaturesGeoJson)
-        // console.log("updatedDeletedFeatures", updatedDeletedFeatures)
 
         const updatedDelNames = updatedDeletedFeatures.map(feature => feature.properties?.Name);
-        console.log(updatedDelNames);
         // remove any features previously added
         updatedNewFeatures = updatedNewFeatures.filter(feature => !updatedDelNames.includes(feature.properties?.Name));
-        console.log("updatedNewFeatures2", updatedNewFeatures)
 
         if (mapStore.currEditingLayer !== null) {
             const datasetData: UpdateDatasetType = {

@@ -69,7 +69,7 @@ export class MapStore {
             addLayer: action,
             setLayerProps: action,
             setUserCreatedBackendLayers: action,
-            addUserCreatedBackendLayers: action,
+            // addUserCreatedBackendLayers: action,
             setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
@@ -80,9 +80,7 @@ export class MapStore {
             markersLngLat: computed,
             deletedFeaturesId: computed,
             deletedFeaturesNum: computed,
-            deletedFeaturesGeoJson: computed,
-            userCreatedBackendLayersNewFeatures: computed,
-            userCreatedBackendLayersDelFeatures: computed
+            deletedFeaturesGeoJson: computed
         })
     }
 
@@ -94,9 +92,9 @@ export class MapStore {
         this.layers = updatedLayers;
     } 
 
-    addUserCreatedBackendLayers(newLayer: UserCreatedDatasetLayer) {
-        this.userCreatedBackendLayers.push(newLayer);
-    }
+    // addUserCreatedBackendLayers(newLayer: UserCreatedDatasetLayer) {
+    //     this.userCreatedBackendLayers.push(newLayer);
+    // }
 
     setUserCreatedBackendLayers(updatedLayers: UserCreatedDatasetLayer[]) {
         this.userCreatedBackendLayers = updatedLayers;
@@ -212,24 +210,6 @@ export class MapStore {
         const layerIdx = this.layers.findIndex(layer => layer.layerId === this.currEditingLayer);
         const currLayer = this.layers[layerIdx];
         return currLayer.isUserCreated;
-    }
-
-    get userCreatedBackendLayersNewFeatures(): Feature<Geometry, GeoJsonProperties>[] {
-        const output: Feature<Geometry, GeoJsonProperties>[] = [];
-        this.userCreatedBackendLayers.forEach(layer => {
-            output.concat(layer.newFeatures);
-        })
-
-        return output;
-    }
-
-    get userCreatedBackendLayersDelFeatures(): Feature<Geometry, GeoJsonProperties>[] {
-        const output: Feature<Geometry, GeoJsonProperties>[] = [];
-        this.userCreatedBackendLayers.forEach(layer => {
-            output.concat(layer.deletedFeatures);
-        })
-
-        return output;
     }
 
     get currEditingExtngLayerUpdateInput() {

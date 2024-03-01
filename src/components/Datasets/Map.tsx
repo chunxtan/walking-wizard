@@ -297,13 +297,21 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                                             }
 
                                             addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
-                                            mapStore.addUserCreatedBackendLayers({
+                                            const newBackendLayer = {
                                                 layerId: dataset.title,
                                                 description: dataset.description,
                                                 newFeatures: dataset.newFeatures,
                                                 deletedFeatures: dataset.deletedFeatures,
                                                 _id: dataset._id
-                                            })
+                                            }
+                                            mapStore.setUserCreatedBackendLayers([...mapStore.userCreatedBackendLayers, newBackendLayer]);
+                                            // mapStore.addUserCreatedBackendLayers({
+                                            //     layerId: dataset.title,
+                                            //     description: dataset.description,
+                                            //     newFeatures: dataset.newFeatures,
+                                            //     deletedFeatures: dataset.deletedFeatures,
+                                            //     _id: dataset._id
+                                            // })
                                         }
                                     })
                                 }
