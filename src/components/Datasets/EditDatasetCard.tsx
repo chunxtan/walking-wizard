@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { DeletedFeatureMap, MapStore } from "./MapStore";
+import { MapStore } from "./MapStore";
 import { useEffect, useState } from "react";
 import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";

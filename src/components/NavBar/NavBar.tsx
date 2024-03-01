@@ -4,6 +4,9 @@ import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { logoutUser } from "../../service/users"; 
 import { observer } from "mobx-react";
 import { Avatar, Button, Dropdown, Navbar } from 'flowbite-react';
+import './NavBar.css'
+import '@fontsource-variable/azeret-mono';
+import '@fontsource/monofett';
 
 type NavBarProps = {
     userStore: LoginUserStore
@@ -12,19 +15,19 @@ type NavBarProps = {
 export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element => {
 
     return (
-        <Navbar fluid rounded>
+        <Navbar fluid rounded className="bg-transparent">
             {/* NavBar Start */}
-            <Navbar>
-                <Link to="/" className="btn btn-ghost text-2xl font-medium dark:text-white"><span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">walking wizard</span></Link>
+            <Navbar className="bg-transparent">
+                <Link to="/" className="btn btn-ghost text-2xl font-medium dark:text-white"><span id="app-title" className="text-dark bg-clip-text bg-transparent to-emerald-600 from-sky-400">walking wizard</span></Link>
             </Navbar>
 
             {/* NavBar Center */}
-            <Navbar.Collapse>
-                <Navbar>
-                    <Link to="/datasets">Datasets</Link>
+            <Navbar.Collapse >
+                <Navbar className="bg-transparent navbarLink">
+                    <Link to="/datasets">datasets</Link>
                 </Navbar>
-                <Navbar>
-                    <a href="#">Scenarios</a>
+                <Navbar className="bg-transparent navbarLink">
+                    <a href="#">scenarios</a>
                 </Navbar>
             </Navbar.Collapse>
 

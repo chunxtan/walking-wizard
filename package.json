@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/azeret-mono": "^5.0.19",
+    "@fontsource/monofett": "^5.0.18",
     "autoprefixer": "^10.4.17",
     "crypto-js": "^4.2.0",
     "flowbite": "^2.3.0",

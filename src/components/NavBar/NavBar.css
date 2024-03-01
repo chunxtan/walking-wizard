@@ -1,0 +1,13 @@
+#app-title {
+    font-family: 'Monofett', monospace;
+}
+
+body {
+    font-family: 'Azeret Mono Variable', monospace;
+ }
+
+.navbarLink :hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px; /* Adjust thickness as needed */
+    text-underline-offset: 2px; /* Adjust offset as needed */
+}

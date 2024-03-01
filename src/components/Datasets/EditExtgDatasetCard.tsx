@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { DeletedFeatureMap, MapStore, UserCreatedDatasetLayer } from "./MapStore";
+import { MapStore, UserCreatedDatasetLayer } from "./MapStore";
 import { useEffect, useState } from "react";
 import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";
@@ -50,7 +50,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditExtgDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures, disableEditing, deleteLayerSource, updateLayerSource }: EditExtgDatasetCardProps) : React.JSX.Element => {
+export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, disableEditing, updateLayerSource }: EditExtgDatasetCardProps) : React.JSX.Element => {
     const [updateInput, setUpdateInput] = useState<SaveFormInput>(mapStore.currEditingExtngLayerUpdateInput);   
     const [userId, setUserId] = useState<string>("");
     
@@ -212,10 +212,10 @@ export const EditExtgDatasetCard = observer(({ mapStore, addSourceLayer, userSto
             </a>
 
             <div id="feature-tracking">
-                <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">
+                <p className="mb-3 text-xs font-normal text-gray-700 dark:text-gray-400">
                     {mapStore.markers.length} features added
                 </p>
-                <p className="mb-3 text-sm font-normal text-gray-700 dark:text-gray-400">
+                <p className="mb-3 text-xs font-normal text-gray-700 dark:text-gray-400">
                     {mapStore.deletedFeaturesNum} features deleted
                 </p>
             </div>

@@ -1,9 +1,13 @@
 #feature-tracking {
-    background-color: lightgray;
+    background-color: rgb(232, 232, 232);
     border-radius: 10px;
-    padding: 5px;
+    padding: 7px;
 }
 
 #feature-tracking > p {
     margin-bottom: 0px;
+    margin-left: 5px;
+    font-size: x-small;
+    text-align: left;
+    font-weight: 500;
 }
