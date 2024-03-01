@@ -40,7 +40,7 @@ export const HomePage = (): React.JSX.Element => {
             {
                 isClient && carouselContent.map(content => {
                     return (     
-                        <Card
+                        <Card key={content.title}
                         className="max-w-sm">
                         <img className="rounded-t-lg" src={content.image} alt="" />
                         <h5 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">
