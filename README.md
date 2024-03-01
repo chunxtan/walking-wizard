@@ -10,6 +10,12 @@ Assessing accessibility to your nearest amenity, one simulation at a time! Walki
 
 https://walking-wizard.onrender.com
 
+## Screenshots
+![editDatasets](https://github.com/chunxtan/walking-wizard/assets/99042026/aaec0529-9cc4-4dc4-975f-3ff968f601f8)
+![chooseDatasets](https://github.com/chunxtan/walking-wizard/assets/99042026/7ca38fc7-52ba-4bfb-ba6b-8937c038f98c)
+![runAnalysis](https://github.com/chunxtan/walking-wizard/assets/99042026/2de3dfff-2a67-4cd6-8410-553b152d4ba3)
+
+
 
 ## 🔗 Links
 - [Frontend Repo](https://github.com/chunxtan/walking-wizard)
