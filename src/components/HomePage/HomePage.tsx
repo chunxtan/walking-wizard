@@ -1,5 +1,4 @@
 import { Card } from 'flowbite-react';
-import Image from 'next/image';
 import './HomePage.css';
 import '@fontsource/silkscreen';
 import { useState, useEffect } from 'react';
