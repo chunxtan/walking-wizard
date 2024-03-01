@@ -16,12 +16,13 @@ export type UserCreatedDatasetLayer = {
     layerId: string,
     description: string,
     newFeatures: Feature<Geometry, GeoJsonProperties>[],
-    deletedFeatures: FeatureId[]
+    deletedFeatures: Feature<Geometry, GeoJsonProperties>[],
+    _id: string
 }
 
 export type FeatureId = string | number | undefined
-type deletedFeatures = {
-    id: FeatureId,
+export type DeletedFeatureMap = {
+    featureId: FeatureId,
     feature: mapboxgl.MapboxGeoJSONFeature
 }
 
@@ -36,7 +37,7 @@ export class MapStore {
     clickCoords: LngLat;
     markers: Marker[];
     currEditingLayer: string | null;
-    deletedFeatures: deletedFeatures[];
+    deletedFeaturesMap: DeletedFeatureMap[];
     editHandle: MapEditListener | null;
 
     constructor() {
@@ -46,7 +47,8 @@ export class MapStore {
         this.clickCoords = new LngLat(0, 0);
         this.markers = [];
         this.currEditingLayer = null;
-        this.deletedFeatures = [];
+        this.deletedFeaturesMap = [];
+        
         this.editHandle = null;
 
         makeObservable(this, {
@@ -54,7 +56,7 @@ export class MapStore {
             layersReady: observable,
             markers: observable,
             currEditingLayer: observable,
-            deletedFeatures: observable,
+            deletedFeaturesMap: observable,
             userCreatedBackendLayers: observable,
             addLayer: action,
             setLayerProps: action,
@@ -63,13 +65,14 @@ export class MapStore {
             toggleLayersReady: action,
             clearCoordsMarkers: action,
             setCurrEditingLayer: action,
-            setDeletedFeatures: action,
+            setDeletedFeaturesMap: action,
             totalEditingLayers: computed,
             markersGeoJson: computed,
             markersLngLat: computed,
             deletedFeaturesId: computed,
             deletedFeaturesNum: computed,
-            deletedFeaturesGeoJson: computed
+            deletedFeaturesGeoJson: computed,
+            userCreatedBackendLayersNewFeatures: computed
         })
     }
 
@@ -156,16 +159,16 @@ export class MapStore {
         })
     }
 
-    setDeletedFeatures(updatedDeletedFeatures: deletedFeatures[]) {
-        this.deletedFeatures = updatedDeletedFeatures;
+    setDeletedFeaturesMap(updatedDeletedFeatures: DeletedFeatureMap[]) {
+        this.deletedFeaturesMap = updatedDeletedFeatures;
     }
 
     get deletedFeaturesId() {
-        return this.deletedFeatures.map(feature => feature.id);
+        return this.deletedFeaturesMap.map(feature => feature.featureId);
     }
 
     get deletedFeaturesGeoJson(): Feature<Geometry, GeoJsonProperties>[] {
-        return this.deletedFeatures.map((deletedFeature) => {
+        return this.deletedFeaturesMap.map((deletedFeature) => {
             const feature = deletedFeature.feature;
             const output: Feature<Geometry, GeoJsonProperties> = {
                 "type": "Feature",
@@ -178,7 +181,7 @@ export class MapStore {
     }
 
     get deletedFeaturesNames(): string[] {
-        return this.deletedFeatures.map((deletedFeature) => {
+        return this.deletedFeaturesMap.map((deletedFeature) => {
             const feature = deletedFeature.feature;
             let output;
             if (feature.properties) {
@@ -191,7 +194,7 @@ export class MapStore {
     }
 
     get deletedFeaturesNum() {
-        return this.deletedFeatures.length;
+        return this.deletedFeaturesMap.length;
     }
 
     get isCurrEditingLayerUserCreated(): boolean {
@@ -199,4 +202,14 @@ export class MapStore {
         const currLayer = this.layers[layerIdx];
         return currLayer.isUserCreated;
     }
+
+    get userCreatedBackendLayersNewFeatures(): Feature<Geometry, GeoJsonProperties>[] {
+        const output: Feature<Geometry, GeoJsonProperties>[] = [];
+        this.userCreatedBackendLayers.forEach(layer => {
+            output.concat(layer.newFeatures);
+        })
+
+        return output;
+    }
+
 }

@@ -7,7 +7,7 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { DatasetLayer, FeatureId, MapStore } from './MapStore';
+import { DatasetLayer, MapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 import { Toast } from 'flowbite-react';
@@ -237,22 +237,30 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                                 if (extgDatasets.datasets.length > 0) {
                                     extgDatasets.datasets.forEach((dataset: ExtgDatasets) => {
                                         const parentData = DATASETID_LOOKUP[dataset.parentLayerId];
-                                        let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
-                                        if (dataset.newFeatures) {
-                                            datasetFeatures = parentData.features.concat(dataset.newFeatures);
-                                        }
-                                        const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
-                                            "type": "FeatureCollection",
-                                            "features": datasetFeatures
-                                        }
+                                        if (parentData) {
+                                            let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
 
-                                        addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
-                                        mapStore.addUserCreatedBackendLayers({
-                                            layerId: dataset.title,
-                                            description: dataset.description,
-                                            newFeatures: dataset.newFeatures,
-                                            deletedFeatures: dataset.deletedFeatures
-                                        })
+                                            if (dataset.newFeatures) {
+                                                datasetFeatures = parentData.features.concat(dataset.newFeatures);
+                                            }
+                                            if (dataset.deletedFeatures) {
+                                                const deletedFeatureNames = dataset.deletedFeatures.map(feature => feature.properties?.Name);
+                                                datasetFeatures = datasetFeatures.filter(feature => !deletedFeatureNames.includes(feature.properties?.Name))
+                                            }
+                                            const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
+                                                "type": "FeatureCollection",
+                                                "features": datasetFeatures
+                                            }
+
+                                            addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
+                                            mapStore.addUserCreatedBackendLayers({
+                                                layerId: dataset.title,
+                                                description: dataset.description,
+                                                newFeatures: dataset.newFeatures,
+                                                deletedFeatures: dataset.deletedFeatures,
+                                                _id: dataset._id
+                                            })
+                                        }
                                     })
                                 }
                             }
@@ -319,6 +327,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 return
             } else {
                 const feature = featuresIdentified[0];
+                console.log("editHandler delete feature", feature);
                 deleteId = feature.id;
                 if (mapStore.deletedFeaturesId.includes(deleteId)) {
                     map.current?.setFeatureState({
@@ -329,9 +338,9 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     })
 
                     const idxToRemove = mapStore.deletedFeaturesId.indexOf(deleteId);
-                    const newDeletedFeatures = [...mapStore.deletedFeatures];
+                    const newDeletedFeatures = [...mapStore.deletedFeaturesMap];
                     newDeletedFeatures.splice(idxToRemove, 1);
-                    mapStore.setDeletedFeatures(newDeletedFeatures);
+                    mapStore.setDeletedFeaturesMap(newDeletedFeatures);
 
                 } else {
                     map.current?.setFeatureState({
@@ -340,8 +349,8 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     }, {
                         isDeleted: true
                     })
-                    const newDeletedFeature = { id: deleteId, feature: feature };
-                    mapStore.setDeletedFeatures([...mapStore.deletedFeatures, newDeletedFeature]);
+                    const newDeletedFeature = { featureId: deleteId, feature: feature };
+                    mapStore.setDeletedFeaturesMap([...mapStore.deletedFeaturesMap, newDeletedFeature]);
                 }
 
             }
@@ -391,7 +400,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 })
             }
         });
-        mapStore.setDeletedFeatures([]);
+        mapStore.setDeletedFeaturesMap([]);
     }
 
     const toggleLayer = (id: string, toggleType: "vis" | "edit") => {

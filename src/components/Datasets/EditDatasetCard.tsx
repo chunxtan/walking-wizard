@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { MapStore, FeatureId } from "./MapStore";
+import { DeletedFeatureMap, MapStore } from "./MapStore";
 import { useEffect, useState } from "react";
 import { hdbData } from "../../datasets/hdb_bedok_centroid";
 import { preschoolData } from "../../datasets/preschools_bedok";
@@ -20,11 +20,19 @@ export type NewDatasetType = {
     description: string;
     parentLayerId: string;
     newFeatures: Feature<Geometry, GeoJsonProperties>[];
-    deletedFeatures: FeatureId[];
+    deletedFeatures: Feature<Geometry, GeoJsonProperties>[];
 }
 
 export type CreateDatasetType = NewDatasetType & {
     userId: string;
+}
+
+export type UpdateDatasetType = {
+    title: string,
+    description: string,
+    newFeatures: Feature<Geometry, GeoJsonProperties>[];
+    deletedFeatures: Feature<Geometry, GeoJsonProperties>[];
+    userId: string
 }
  
 type EditDatasetCardProps = {
@@ -104,7 +112,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 ...saveInput, 
                 parentLayerId: mapStore.currEditingLayer,
                 ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
-                ...(mapStore.deletedFeatures && { deletedFeatures: mapStore.deletedFeaturesId })
+                ...(mapStore.deletedFeaturesMap && { deletedFeatures: mapStore.deletedFeaturesGeoJson })
             }
             const currEditingLayerId = mapStore.currEditingLayer;
             const newGeoJsonData = prepSrcData(currEditingLayerId, datasetData.newFeatures, mapStore.deletedFeaturesNames);
@@ -144,7 +152,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 parentLayerId: mapStore.currEditingLayer,
                 // copy features from geojson of parentLayer
                 ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
-                ...(mapStore.deletedFeatures && { deletedFeatures: mapStore.deletedFeaturesId })
+                ...(mapStore.deletedFeaturesMap && { deletedFeatures: mapStore.deletedFeaturesGeoJson })
             }
 
             try {
@@ -246,6 +254,49 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         }
     }
 
+    const handleUpdate = async () => {
+
+        const token = localStorage.getItem('token'); 
+        if (!token) throw new Error('Token not found');
+
+        // process for changes in user edits
+        // const updatedNewFeatures: Feature<Geometry, GeoJsonProperties>[] = mapStore.userCreatedBackendLayersNewFeatures.concat(mapStore.markersGeoJson);
+        // const updatedDeletedFeatures: FeatureId[] = mapStore.userCreatedBackendLayersDeletedFeaturesId.concat(mapStore.deletedFeaturesId);
+
+        if (mapStore.currEditingLayer !== null) {
+            const datasetData: UpdateDatasetType = {
+                ...saveInput,
+                userId: userId,
+                ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
+                ...(mapStore.deletedFeaturesMap && { deletedFeatures: mapStore.deletedFeaturesGeoJson })
+            }
+
+            const currEditingLayerObj = mapStore.userCreatedBackendLayers.find(layer => layer.layerId === mapStore.currEditingLayer )
+            const currEditingLayerBackendId = currEditingLayerObj?._id;
+
+            try {
+
+                const res = await fetch(`http://localhost:3000/datasets/update/${currEditingLayerBackendId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(datasetData),
+                });
+
+                if (res.ok) {
+                    const jsonData = await res.json();
+                    console.log("update json", jsonData);
+
+                }
+
+            } catch(err) {
+                console.error(err);
+            }
+        }
+    }
+
     return (
         <div className="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <a href="#">
@@ -278,7 +329,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                     ? 
                     mapStore.isCurrEditingLayerUserCreated
                     ? 
-                    <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    <button id="login-save" onClick={() => handleUpdate()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                         Update
                     </button>   
                     :

@@ -14,9 +14,9 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
     return (
         <Navbar fluid rounded>
             {/* NavBar Start */}
-            <Navbar.Brand>
+            <Navbar>
                 <Link to="/" className="btn btn-ghost text-2xl font-medium dark:text-white"><span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">walking wizard</span></Link>
-            </Navbar.Brand>
+            </Navbar>
 
             {/* NavBar Center */}
             <Navbar.Collapse>
