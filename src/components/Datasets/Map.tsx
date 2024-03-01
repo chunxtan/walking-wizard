@@ -15,6 +15,7 @@ import { HiCheck } from 'react-icons/hi';
 import { LoginUserStore } from '../UserProfile/LoginSignUp/LoginUserStore';
 import { getToken } from '../../util/security';
 import { DATASETID_LOOKUP, CreateDatasetType } from './EditDatasetCard';
+import { EditExtgDatasetCard } from './EditExtgDatasetCard';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -97,6 +98,13 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
             
         }
 
+    }
+
+    const updateLayerSource = (id: string, newData: mapboxgl.AnySourceData) => {
+        if (map.current) {
+            // @ts-ignore
+            map.current.getSource(id).setData(newData);
+        }
     }
 
     const deleteLayerSource = (id: string): void => {
@@ -327,7 +335,6 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 return
             } else {
                 const feature = featuresIdentified[0];
-                console.log("editHandler delete feature", feature);
                 deleteId = feature.id;
                 if (mapStore.deletedFeaturesId.includes(deleteId)) {
                     map.current?.setFeatureState({
@@ -448,6 +455,12 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 {
                     mapStore.currEditingLayer
                     ? 
+                    mapStore.isCurrEditingLayerUserCreated 
+                    ?
+                    <div className="sidebar-right">
+                        <EditExtgDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} deleteLayerSource={deleteLayerSource} updateLayerSource={updateLayerSource} />
+                    </div>
+                    :
                     <div className="sidebar-right">
                         <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} />
                     </div>

@@ -61,6 +61,7 @@ export class MapStore {
             addLayer: action,
             setLayerProps: action,
             setUserCreatedBackendLayers: action,
+            addUserCreatedBackendLayers: action,
             setMarkers: action,
             toggleLayersReady: action,
             clearCoordsMarkers: action,
@@ -72,7 +73,8 @@ export class MapStore {
             deletedFeaturesId: computed,
             deletedFeaturesNum: computed,
             deletedFeaturesGeoJson: computed,
-            userCreatedBackendLayersNewFeatures: computed
+            userCreatedBackendLayersNewFeatures: computed,
+            userCreatedBackendLayersDelFeatures: computed
         })
     }
 
@@ -136,12 +138,13 @@ export class MapStore {
     }
 
     get markersGeoJson(): Feature<Geometry, GeoJsonProperties>[] {
-        return this.markers.map((marker, idx) => {
+        return this.markers.map((marker) => {
             const {lng, lat} = marker.getLngLat() as LngLat;
+            const randId = Math.random().toString(16).slice(2)
             const feature: Feature<Geometry, GeoJsonProperties> = {
                 "type": "Feature",
                 "properties": {
-                    "Name": `userGenerated_${idx}`,
+                    "Name": `userGenerated_${randId}`,
                     "Description": "",
                 },
                 "geometry": {
@@ -211,5 +214,26 @@ export class MapStore {
 
         return output;
     }
+
+    get userCreatedBackendLayersDelFeatures(): Feature<Geometry, GeoJsonProperties>[] {
+        const output: Feature<Geometry, GeoJsonProperties>[] = [];
+        this.userCreatedBackendLayers.forEach(layer => {
+            output.concat(layer.deletedFeatures);
+        })
+
+        return output;
+    }
+
+    get currEditingExtngLayerUpdateInput() {
+        let output = { title: "", description: "" };
+            const currEditingLayerObj = this.userCreatedBackendLayers.find(layer => layer.layerId === this.currEditingLayer);
+            output = {
+                title: currEditingLayerObj?.layerId || "",
+                description: currEditingLayerObj?.description || "",
+            }
+        
+        return output;
+    }
+    
 
 }

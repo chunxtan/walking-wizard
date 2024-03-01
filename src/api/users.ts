@@ -3,7 +3,7 @@ import { LoginDetails } from "../components/UserProfile/LoginSignUp/LoginForm"
 import { UserPayload } from "../components/UserProfile/LoginSignUp/LoginUserStore";
 
 // This is the base path of the Express route we'll define
-const BASE_URL = "http://localhost:3000/users";
+const BASE_URL = "https://walking-wizard-be.onrender.com/users";
 
 type UserDao = {
   firstName: string,

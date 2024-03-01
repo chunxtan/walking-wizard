@@ -157,7 +157,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
 
             try {
                 // send POST request
-                const res = await fetch("http://localhost:3000/datasets/create", {
+                const res = await fetch("https://walking-wizard-be.onrender.com/datasets/create", {
                     method: "POST",
                     headers: { 
                         "Content-Type": "application/json",
@@ -235,7 +235,15 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                     const backendId = jsonData.data._id;
 
                     addSourceLayer(saveInput.title, newGeoJsonData, currEditingLayerId, backendId);
-                
+
+                    mapStore.addUserCreatedBackendLayers({
+                        layerId: saveInput.title,
+                        description: saveInput.description,
+                        newFeatures: mapStore.markersGeoJson,
+                        deletedFeatures: mapStore.deletedFeaturesGeoJson,
+                        _id: backendId
+                    })
+
                     
                     // reset form & close card
                     setSaveInput({
@@ -248,49 +256,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                     throw new Error("Invalid dataset creation.")
                 }
     
-            } catch(err) {
-                console.error(err);
-            }
-        }
-    }
-
-    const handleUpdate = async () => {
-
-        const token = localStorage.getItem('token'); 
-        if (!token) throw new Error('Token not found');
-
-        // process for changes in user edits
-        // const updatedNewFeatures: Feature<Geometry, GeoJsonProperties>[] = mapStore.userCreatedBackendLayersNewFeatures.concat(mapStore.markersGeoJson);
-        // const updatedDeletedFeatures: FeatureId[] = mapStore.userCreatedBackendLayersDeletedFeaturesId.concat(mapStore.deletedFeaturesId);
-
-        if (mapStore.currEditingLayer !== null) {
-            const datasetData: UpdateDatasetType = {
-                ...saveInput,
-                userId: userId,
-                ...(mapStore.markersGeoJson && { newFeatures: mapStore.markersGeoJson }),
-                ...(mapStore.deletedFeaturesMap && { deletedFeatures: mapStore.deletedFeaturesGeoJson })
-            }
-
-            const currEditingLayerObj = mapStore.userCreatedBackendLayers.find(layer => layer.layerId === mapStore.currEditingLayer )
-            const currEditingLayerBackendId = currEditingLayerObj?._id;
-
-            try {
-
-                const res = await fetch(`http://localhost:3000/datasets/update/${currEditingLayerBackendId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(datasetData),
-                });
-
-                if (res.ok) {
-                    const jsonData = await res.json();
-                    console.log("update json", jsonData);
-
-                }
-
             } catch(err) {
                 console.error(err);
             }
@@ -327,12 +292,6 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
                 {
                     userStore.user
                     ? 
-                    mapStore.isCurrEditingLayerUserCreated
-                    ? 
-                    <button id="login-save" onClick={() => handleUpdate()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-                        Update
-                    </button>   
-                    :
                     <button id="login-save" onClick={() => handleSubmit()} className="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
                         Create 
                     </button>   
