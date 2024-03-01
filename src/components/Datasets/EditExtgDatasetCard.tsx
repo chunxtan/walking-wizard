@@ -42,7 +42,8 @@ type EditExtgDatasetCardProps = {
     cancelDeletedFeatures: () => void,
     disableEditing: () => void,
     deleteLayerSource: (id: string) => void;
-    updateLayerSource: (id: string, newData: mapboxgl.AnySourceData) => void
+    updateLayerSource: (id: string, newData: mapboxgl.AnySourceData) => void,
+    enablePopup: () => void
 }
 
 type SaveFormInput = {
@@ -50,7 +51,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, disableEditing, updateLayerSource }: EditExtgDatasetCardProps) : React.JSX.Element => {
+export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, disableEditing, updateLayerSource, enablePopup }: EditExtgDatasetCardProps) : React.JSX.Element => {
     const [updateInput, setUpdateInput] = useState<SaveFormInput>(mapStore.currEditingExtngLayerUpdateInput);   
     const [userId, setUserId] = useState<string>("");
     
@@ -74,6 +75,7 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
         })))
 
         disableEditing();
+        enablePopup();
     }
 
     const prepSrcData = (currEditingLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> | undefined => {

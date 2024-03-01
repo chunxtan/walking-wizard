@@ -279,6 +279,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 })
 
                 mapStore.toggleLayersReady(true);
+                enablePopup();
 
     }}}, []); 
 
@@ -291,6 +292,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
         // Ensures that only single layer in editing mode 
         else if (mapStore.totalEditingLayers == 1) {
+            disablePopup();
             enableEditing();
         }
             
@@ -364,6 +366,46 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
         }
         
     }
+
+    const enablePopupHandler = (e: MapLayerMouseEvent): void => {
+        const layers = mapStore.layerIds;
+
+        if (map.current) {
+            const features = map.current.queryRenderedFeatures(e.point, {
+                layers: layers
+            })
+
+            if (!features.length) {
+                return
+            } 
+            const feature = features[0];
+            const coords = e.lngLat;
+            const description = feature.properties?.Description
+            const popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: true
+            })
+            popup.setLngLat(coords).setHTML(description).addTo(map.current);
+            mapStore.popup = popup;
+        }
+
+    }
+
+    const enablePopup = (): void => {
+        if (map.current) {
+            map.current.on('click', enablePopupHandler)
+            mapStore.popupHandle = enablePopupHandler;
+        }
+    }
+
+    const disablePopup = (): void => {
+        if (map.current) {
+            map.current.off('click', enablePopupHandler);
+            mapStore.popupHandle = null;
+            mapStore.popup = null;
+        }
+    }
+
 
     const enableEditing = (): void => {
 
@@ -458,11 +500,11 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                     mapStore.isCurrEditingLayerUserCreated 
                     ?
                     <div className="sidebar-right">
-                        <EditExtgDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} deleteLayerSource={deleteLayerSource} updateLayerSource={updateLayerSource} />
+                        <EditExtgDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} deleteLayerSource={deleteLayerSource} updateLayerSource={updateLayerSource} enablePopup={enablePopup} />
                     </div>
                     :
                     <div className="sidebar-right">
-                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} />
+                        <EditDatasetCard mapStore={mapStore} addSourceLayer={addSourceLayer} userStore={userStore} cancelDeletedFeatures={cancelDeletedFeatures} disableEditing={disableEditing} enablePopup={enablePopup} />
                     </div>
                     :
                     null

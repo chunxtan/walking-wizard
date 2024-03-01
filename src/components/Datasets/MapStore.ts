@@ -28,7 +28,10 @@ export type DeletedFeatureMap = {
 
 interface MapEditListener {
     (ev: mapboxgl.MapMouseEvent & mapboxgl.EventData): void
-  }
+}
+interface PopupListener {
+    (ev: mapboxgl.MapMouseEvent & mapboxgl.EventData): void
+}
 
 export class MapStore {
     layers: DatasetLayer[];
@@ -39,6 +42,8 @@ export class MapStore {
     currEditingLayer: string | null;
     deletedFeaturesMap: DeletedFeatureMap[];
     editHandle: MapEditListener | null;
+    popupHandle: PopupListener | null;
+    popup: mapboxgl.Popup | null;
 
     constructor() {
         this.layers = [];
@@ -50,6 +55,9 @@ export class MapStore {
         this.deletedFeaturesMap = [];
         
         this.editHandle = null;
+        this.popupHandle = null;
+
+        this.popup = null;
 
         makeObservable(this, {
             layers: observable,

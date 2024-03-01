@@ -40,7 +40,8 @@ type EditDatasetCardProps = {
     addSourceLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>, parentId: string, backendId: string) => void;
     userStore: LoginUserStore,
     cancelDeletedFeatures: () => void,
-    disableEditing: () => void
+    disableEditing: () => void,
+    enablePopup: () => void
 }
 
 type SaveFormInput = {
@@ -48,7 +49,7 @@ type SaveFormInput = {
     description: string
 }
 
-export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures, disableEditing }: EditDatasetCardProps) : React.JSX.Element => {
+export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, cancelDeletedFeatures, disableEditing, enablePopup }: EditDatasetCardProps) : React.JSX.Element => {
     const [saveInput, setSaveInput] = useState<SaveFormInput>({
         title: "",
         description: ""
@@ -75,6 +76,7 @@ export const EditDatasetCard = observer(({ mapStore, addSourceLayer, userStore, 
         })))
 
         disableEditing();
+        enablePopup();
     }
 
     const prepSrcData = (currEditingLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> => {
