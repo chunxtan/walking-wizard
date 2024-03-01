@@ -43,7 +43,7 @@ type EditExtgDatasetCardProps = {
     cancelDeletedFeatures: () => void,
     disableEditing: () => void,
     deleteLayerSource: (id: string) => void;
-    updateLayerSource: (id: string, newData: mapboxgl.AnySourceData) => void,
+    updateLayerSource: (id: string, parentLayerId: string, newData: FeatureCollection<Geometry, GeoJsonProperties>) => void,
     enablePopup: () => void
 }
 
@@ -80,9 +80,9 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
         enablePopup();
     }
 
-    const prepSrcData = (currEditingLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> | undefined => {
+    const prepSrcData = (parentLayerId: string, featuresToConcat?: Feature<Geometry, GeoJsonProperties>[], featuresToRemove?: string[]) :FeatureCollection<Geometry, GeoJsonProperties> | undefined => {
 
-        const currData: FeatureCollection<Geometry, GeoJsonProperties> = DATASETID_LOOKUP[currEditingLayerId];
+        const currData: FeatureCollection<Geometry, GeoJsonProperties> = DATASETID_LOOKUP[parentLayerId];
         if (currData) {
             let currPointDataFeatures = currData.features;
             let newPointDataFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
@@ -128,9 +128,9 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
         const backendLayerDelFeatures = mapStore.userCreatedBackendLayers[backendLayerIdx].deletedFeatures;
         const updatedDeletedFeatures: Feature<Geometry, GeoJsonProperties>[] = backendLayerDelFeatures.concat(mapStore.deletedFeaturesGeoJson);
         console.log("updatedNewFeatures1", updatedNewFeatures)
-        console.log("backendLayerDelFeatures", backendLayerDelFeatures)
-        console.log("mapStoreDeletedFeaturesJson", mapStore.deletedFeaturesGeoJson)
-        console.log("updatedDeletedFeatures", updatedDeletedFeatures)
+        // console.log("backendLayerDelFeatures", backendLayerDelFeatures)
+        // console.log("mapStoreDeletedFeaturesJson", mapStore.deletedFeaturesGeoJson)
+        // console.log("updatedDeletedFeatures", updatedDeletedFeatures)
 
         const updatedDelNames = updatedDeletedFeatures.map(feature => feature.properties?.Name);
         console.log(updatedDelNames);
@@ -166,16 +166,18 @@ export const EditExtgDatasetCard = observer(({ mapStore, cancelDeletedFeatures, 
                 if (res.ok) {
                     const jsonData = await res.json();
                     console.log("update json", jsonData);
+
+                    const layer = mapStore.layers.find(layer => layer.layerId === mapStore.currEditingLayer);
+                    let parentLayerId = "";
+                    if (layer && layer.parentLayerId) {
+                        parentLayerId = layer.parentLayerId;
+                    }
                     
-                    const newGeoJsonData = prepSrcData(mapStore.currEditingLayer, updatedNewFeatures, updatedDelNames);
+                    const newGeoJsonData = prepSrcData(parentLayerId, updatedNewFeatures, updatedDelNames);
                     console.log("newGeoJsonData", newGeoJsonData);
                     if (newGeoJsonData) {
                         // replace source data in map
-                        updateLayerSource(mapStore.currEditingLayer, {
-                            type: 'geojson',
-                            data: newGeoJsonData,
-                            generateId: true
-                        });
+                        updateLayerSource(mapStore.currEditingLayer, parentLayerId, newGeoJsonData);
                         // update userCreatedDatasetLayers in mapStore
                         const newCreatedBackendLayers = [...mapStore.userCreatedBackendLayers];
                         for (const layer of newCreatedBackendLayers) {

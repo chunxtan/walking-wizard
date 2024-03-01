@@ -100,10 +100,46 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
     }
 
-    const updateLayerSource = (id: string, newData: mapboxgl.AnySourceData) => {
+    const updateLayerSource = (id: string, parentLayerId: string, newData: FeatureCollection<Geometry, GeoJsonProperties>) => {
         if (map.current) {
-            // @ts-ignore
-            map.current.getSource(id).setData(newData);
+            // remove layer
+            map.current.removeLayer(id);
+            // remove source
+            map.current.removeSource(id);
+
+            // add new src
+            map.current.addSource(id, {
+                type: 'geojson',
+                data: newData,
+                generateId: true
+            })
+            // add new layer
+            map.current.addLayer({
+                "id": id,
+                "type": "circle",
+                "source": id,
+                'layout': {
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 
+                        10, 3, 
+                        12, 4,
+                        12.25, 5,
+                        12.5, 6
+                    ],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': 'white',
+                    'circle-color': [
+                        "case",
+                        ["==", ["feature-state", "isDeleted"], true],
+                        "rgba(255, 0, 0, 0.8)", // Color for clicked features
+                        DATASET_COLOR_LOOKUP[parentLayerId] // Default color
+                      ]
+                }
+                
+            })
+
         }
     }
 
