@@ -166,7 +166,7 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                         const token = getToken();
 
                         try {
-                            const res = await fetch(`http://localhost:3000/datasets/show/${userId}`, {
+                            const res = await fetch(`https://walking-wizard-be.onrender.com/datasets/show/${userId}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
