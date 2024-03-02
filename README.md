@@ -18,6 +18,7 @@ https://walking-wizard.onrender.com
 
 
 ## 🔗 Links
+- [Presentation Deck](https://www.canva.com/design/DAF-QUDxL1k/zfcTgfkB6Qbev4wdYsMrVw/edit?utm_content=DAF-QUDxL1k&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 - [Frontend Repo](https://github.com/chunxtan/walking-wizard)
 - [Backend Repo](https://github.com/chunxtan/walking-wizard-be)
 - [Figma](https://www.figma.com/file/KDvn9g7xv2qYDsC1myAYrp/network-generator?type=design&node-id=0%3A1&mode=design&t=j3BC8APT9OHLpfh5-1)
