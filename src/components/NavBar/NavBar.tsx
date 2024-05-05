@@ -27,7 +27,7 @@ export const NavBar = observer(({ userStore }: NavBarProps): React.JSX.Element =
                     <Link to="/datasets">datasets</Link>
                 </Navbar>
                 <Navbar className="bg-transparent navbarLink">
-                    <a href="#">scenarios</a>
+                    <a href="/scenarios">scenarios</a>
                 </Navbar>
             </Navbar.Collapse>
 

@@ -19,7 +19,7 @@ import { EditExtgDatasetCard } from './EditExtgDatasetCard';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-type MapProps = {
+export type MapProps = {
     userStore: LoginUserStore
 }
 

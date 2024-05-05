@@ -7,6 +7,7 @@ import { LoginUserStore, UserPayload } from './components/UserProfile/LoginSignU
 import { Datasets } from './components/Datasets/Datasets.tsx';
 import { useEffect } from 'react';
 import { getToken } from './util/security.ts';
+import { Scenarios } from './components/Scenarios/Scenarios.tsx';
 
 function App() {
   const userStore = new LoginUserStore();
@@ -28,6 +29,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/datasets" element={<Datasets userStore={userStore} />} />
+          <Route path="/scenarios" element={<Scenarios userStore={userStore} />} />
           <Route path="/login-signup" element={<LoginSignUp userStore={userStore} />} />
         </Routes>
       </main>
