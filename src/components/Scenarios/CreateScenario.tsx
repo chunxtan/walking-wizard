@@ -102,19 +102,13 @@ export const CreateScenario = ({ setSidebarMode, userStore }: CreateScenarioProp
     const runAnalysis = () => {
         const selDatasets = prepareDatasets();
         downloadInputFiles(selDatasets);
+        setSidebarMode("result");
     }
-
-    // next:
-    // apply atos equation to jupyter notebook code
-    // add score column
-    // build upload tool 
-    // apply symbology to incoming layer
 
     // to fix:
     // why cant i fetch layerId from mapStore
     // fix api gateway / ec2 instance / lambda function
     
-
     return (
         <div id='menu' className="space-y-2 font-medium">
             Create new scenario

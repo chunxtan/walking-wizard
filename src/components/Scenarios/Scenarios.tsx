@@ -4,8 +4,10 @@ import { MapProps } from "../Datasets/Map";
 import mapboxgl from 'mapbox-gl';
 import { ScenarioList } from './ScenarioList';
 import { CreateScenario } from './CreateScenario';
+import { ScenarioResult } from './ScenarioResult';
+import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 
-export type SidebarMode = "view" | "create";
+export type SidebarMode = "view" | "create" | "result";
 
 export const Scenarios = observer(({ userStore }: MapProps): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
@@ -30,6 +32,77 @@ export const Scenarios = observer(({ userStore }: MapProps): React.JSX.Element =
                 return <ScenarioList setSidebarMode={setSidebarMode} />
             case "create":
                 return <CreateScenario setSidebarMode={setSidebarMode} userStore={userStore} />
+            case "result":
+                return <ScenarioResult setSidebarMode={setSidebarMode} addResultLayer={addResultLayer} deleteLayerSource={deleteLayerSource} />
+        }
+    }
+
+    const deleteLayerSource = (id: string): void => {
+        if (map.current) {
+            map.current.removeLayer(id);
+            map.current.removeSource(id);
+        }
+    }
+
+    // addLayer for ATOS Result geojson
+    const addResultLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>) => {
+        if (map.current) {
+
+            const checkSrc = map.current.getSource(id);
+
+            if (!checkSrc) {
+                map.current.addSource(id, {
+                    type: 'geojson',
+                    data: geoJsonData,
+                    generateId: true
+                })
+            }
+
+            map.current.addLayer({
+                "id": id,
+                "type": "circle",
+                "source": id,
+                'layout': {
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 
+                        10, 3, 
+                        12, 4,
+                        12.25, 5,
+                        12.5, 6
+                    ],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': 'white',
+                    'circle-color': [
+                        
+                          'interpolate',
+                          ['linear'],
+                          ['get', 'ATOS_SCORE'],
+                          1,
+                          '#FF0000',
+                          2,
+                          '#E61900',
+                          3,
+                          '#CC3300',
+                          4,
+                          '#B34D00',
+                          5,
+                          '#996600',
+                          6,
+                          '#7F8000',
+                          7,
+                          '#669900',
+                          8,
+                          '#50A300',
+                          9,
+                          '#33B300',
+                          10,
+                          '#00C200'
+                      ]                  
+                }
+                
+            })
         }
     }
 
