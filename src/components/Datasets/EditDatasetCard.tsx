@@ -9,11 +9,13 @@ import { LoginUserStore } from "../UserProfile/LoginSignUp/LoginUserStore";
 import { getToken } from "../../util/security";
 import './EditDatasetCard.css'
 import { Button } from 'flowbite-react';
+import { networkData } from "../../datasets/network_bedok";
 
 export const DATASETID_LOOKUP: Record<string, GeoJSON.FeatureCollection<GeoJSON.Geometry>> = {
     "hdb": hdbData,
     "preschools": preschoolData,
-    "mrt": mrtData
+    "mrt": mrtData,
+    "network": networkData
 }
 
 export type NewDatasetType = {

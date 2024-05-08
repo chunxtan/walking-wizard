@@ -218,5 +218,6 @@ export class MapStore {
         return output;
     }
     
-
 }
+
+export const mapStore = new MapStore();

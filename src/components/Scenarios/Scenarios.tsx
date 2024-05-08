@@ -2,10 +2,16 @@ import React, { useRef, useEffect, LegacyRef, useState } from 'react';
 import { observer } from "mobx-react";
 import { MapProps } from "../Datasets/Map";
 import mapboxgl from 'mapbox-gl';
+import { ScenarioList } from './ScenarioList';
+import { CreateScenario } from './CreateScenario';
+
+export type SidebarMode = "view" | "create";
 
 export const Scenarios = observer(({ userStore }: MapProps): React.JSX.Element => {
     const mapContainer = useRef<string | HTMLElement | null>(null);
     const map = useRef<mapboxgl.Map>();
+
+    const [sidebarMode, setSidebarMode] = useState<SidebarMode>("view");
 
     useEffect(() => {
         // Set up map
@@ -18,13 +24,20 @@ export const Scenarios = observer(({ userStore }: MapProps): React.JSX.Element =
           });
     }}, []); 
 
+    const switchSidebar = () => {
+        switch(sidebarMode) {
+            case "view":
+                return <ScenarioList setSidebarMode={setSidebarMode} />
+            case "create":
+                return <CreateScenario setSidebarMode={setSidebarMode} userStore={userStore} />
+        }
+    }
+
     return (
         <div>
             <div id="map-frame" className="relative">
                 <div className="sidebar max-w-sm p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                    <ul id='menu' className="space-y-2 font-medium">
-                        Scenarios
-                    </ul>
+                    {switchSidebar()}
                 </div>
 
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />

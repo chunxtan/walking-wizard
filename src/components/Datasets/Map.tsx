@@ -7,7 +7,7 @@ import { mrtData } from '../../datasets/mrt_bedok_centroid';
 import { networkData } from '../../datasets/network_bedok';
 import LayerToggleComponent from './LayerToggleComponent';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { DatasetLayer, MapStore } from './MapStore';
+import { DatasetLayer, mapStore } from './MapStore';
 import { observer } from 'mobx-react';
 import { EditDatasetCard } from './EditDatasetCard';
 import { Toast } from 'flowbite-react';
@@ -32,13 +32,30 @@ type ExtgDatasets = CreateDatasetType & {
     _id: string;
 }
 
-// Set up store
-const mapStore = new MapStore();
-
 const DATASET_COLOR_LOOKUP: Record<string, string> = {
     "hdb": 'rgba(55,148,179,1)',
     "preschools": 'rgb(125, 125, 222)',
     "mrt": 'rgb(57, 143, 45)' 
+}
+
+export const patchBackendData = (parentLayerId: string, newFeatures?: Feature<Geometry, GeoJsonProperties>[], deletedFeatures?: Feature<Geometry, GeoJsonProperties>[]) => {
+    const parentData = DATASETID_LOOKUP[parentLayerId];
+    if (parentData) {
+        let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+
+        if (newFeatures) {
+            datasetFeatures = parentData.features.concat(newFeatures);
+        }
+        if (deletedFeatures) {
+            const deletedFeatureNames = deletedFeatures.map(feature => feature.properties?.Name);
+            datasetFeatures = datasetFeatures.filter(feature => !deletedFeatureNames.includes(feature.properties?.Name))
+        }
+        const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
+            "type": "FeatureCollection",
+            "features": datasetFeatures
+        }
+        return geoJsonData;
+    }
 }
 
 export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element => {
@@ -280,33 +297,21 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
                                 if (extgDatasets.datasets.length > 0) {
                                     extgDatasets.datasets.forEach((dataset: ExtgDatasets) => {
-                                        const parentData = DATASETID_LOOKUP[dataset.parentLayerId];
-                                        if (parentData) {
-                                            let datasetFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+                                            const geoJsonData = patchBackendData(dataset.parentLayerId, dataset.newFeatures, dataset.deletedFeatures);
 
-                                            if (dataset.newFeatures) {
-                                                datasetFeatures = parentData.features.concat(dataset.newFeatures);
+                                            if (geoJsonData) {
+                                                addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
+                                                const newBackendLayer = {
+                                                    layerId: dataset.title,
+                                                    description: dataset.description,
+                                                    newFeatures: dataset.newFeatures,
+                                                    deletedFeatures: dataset.deletedFeatures,
+                                                    _id: dataset._id
+                                                }
+                                                mapStore.setUserCreatedBackendLayers([...mapStore.userCreatedBackendLayers, newBackendLayer]);
                                             }
-                                            if (dataset.deletedFeatures) {
-                                                const deletedFeatureNames = dataset.deletedFeatures.map(feature => feature.properties?.Name);
-                                                datasetFeatures = datasetFeatures.filter(feature => !deletedFeatureNames.includes(feature.properties?.Name))
-                                            }
-                                            const geoJsonData: GeoJSON.FeatureCollection<GeoJSON.Geometry>  = {
-                                                "type": "FeatureCollection",
-                                                "features": datasetFeatures
-                                            }
-
-                                            addSourceLayer(dataset.title, geoJsonData, dataset.parentLayerId, dataset._id);
-                                            const newBackendLayer = {
-                                                layerId: dataset.title,
-                                                description: dataset.description,
-                                                newFeatures: dataset.newFeatures,
-                                                deletedFeatures: dataset.deletedFeatures,
-                                                _id: dataset._id
-                                            }
-                                            mapStore.setUserCreatedBackendLayers([...mapStore.userCreatedBackendLayers, newBackendLayer]);
                                         }
-                                    })
+                                    )
                                 }
                             }
                         } catch(err) {
