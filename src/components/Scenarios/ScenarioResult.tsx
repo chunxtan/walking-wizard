@@ -6,11 +6,10 @@ import { atosRes_TEST04 } from "../../datasets/ATOS_RESULTS_TEST04";
 
 type ScenarioResultProps = {
     setSidebarMode: (mode: SidebarMode) => void,
-    addResultLayer: (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>) => void,
-    deleteLayerSource: (id: string) => void
+    map: React.MutableRefObject<mapboxgl.Map | undefined>
 }
 
-export const ScenarioResult = ({ setSidebarMode, addResultLayer, deleteLayerSource }: ScenarioResultProps) : React.JSX.Element => {
+export const ScenarioResult = ({ setSidebarMode, map }: ScenarioResultProps) : React.JSX.Element => {
     const results = {
         "total_origin": 575,
         "origin_within_400": 501,
@@ -18,15 +17,84 @@ export const ScenarioResult = ({ setSidebarMode, addResultLayer, deleteLayerSour
         "avg_travelling_dist": 239.94515839113708
     }
 
-    // Render layer of ATOS Results
-    addResultLayer("atos_res", atosRes_TEST04);
-
-
     const handleRestart = () => {
         setSidebarMode("view");
         // Clear Map
         deleteLayerSource("atos_res");
     }
+
+    const deleteLayerSource = (id: string): void => {
+        if (map.current) {
+            map.current.removeLayer(id);
+            map.current.removeSource(id);
+        }
+    }
+
+    // addLayer for ATOS Result geojson
+    const addResultLayer = (id: string, geoJsonData: FeatureCollection<Geometry, GeoJsonProperties>) => {
+        if (map.current) {
+
+            const checkSrc = map.current.getSource(id);
+
+            if (!checkSrc) {
+                map.current.addSource(id, {
+                    type: 'geojson',
+                    data: geoJsonData,
+                    generateId: true
+                })
+            }
+
+            map.current.addLayer({
+                "id": id,
+                "type": "circle",
+                "source": id,
+                'layout': {
+                    'visibility': 'visible'
+                },
+                'paint': {
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 
+                        10, 2, 
+                        12, 3,
+                        12.25, 4,
+                        12.5, 6
+                    ],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': 'white',
+                    'circle-color': [
+                        
+                          'interpolate',
+                          ['linear'],
+                          ['get', 'ATOS_SCORE'],
+                          1,
+                          '#FF0000',
+                          2,
+                          '#E61900',
+                          3,
+                          '#CC3300',
+                          4,
+                          '#B34D00',
+                          5,
+                          '#996600',
+                          6,
+                          '#7F8000',
+                          7,
+                          '#669900',
+                          8,
+                          '#50A300',
+                          9,
+                          '#33B300',
+                          10,
+                          '#00C200'
+                      ]                  
+                }
+                
+            })
+        }
+    }
+
+    // Render layer of ATOS Results
+    addResultLayer("atos_res", atosRes_TEST04);
+    // TODO: Render layer of facilities
 
     return (
         <div id='res-menu' className="space-y-2 font-medium">
