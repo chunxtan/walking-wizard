@@ -16,6 +16,7 @@ import { LoginUserStore } from '../UserProfile/LoginSignUp/LoginUserStore';
 import { getToken } from '../../util/security';
 import { DATASETID_LOOKUP, CreateDatasetType } from './EditDatasetCard';
 import { EditExtgDatasetCard } from './EditExtgDatasetCard';
+import { Scenarios } from '../Scenarios/Scenarios';
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -411,11 +412,14 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
 
     const enablePopupHandler = (e: MapLayerMouseEvent): void => {
         const layers = mapStore.layerIds;
+        const scenarios = mapStore.scenarioIds;
+        const layersConcat = layers.concat(scenarios);
 
         if (map.current) {
             const features = map.current.queryRenderedFeatures(e.point, {
-                layers: layers
+                layers: layersConcat
             })
+            console.log("layers", layersConcat)
 
             if (!features.length) {
                 return
@@ -427,8 +431,17 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 closeButton: false,
                 closeOnClick: true
             })
-            popup.setLngLat(coords).setHTML(description).addTo(map.current);
-            mapStore.popup = popup;
+            
+
+            if (description) {
+                popup.setLngLat(coords).setHTML(description).addTo(map.current)
+            } else {
+                const atos_score = feature.properties?.ATOS_SCORE;
+                const atos_dist = feature.properties?.dist_to_closest_amen;
+
+                const atos_html = `<center><table><tr><th colspan='2' align='center'><em>Attributes</em></th></tr> <tr bgcolor=\"#E3E3F3\"> <th>ATOS SCORE</th> <td>${atos_score}</td> </tr><tr bgcolor=\"\"> <th>DIST</th> <td>${atos_dist}</td> </tr></table></center>`
+                popup.setLngLat(coords).setHTML(atos_html).addTo(map.current)
+            }
         }
 
     }
@@ -583,6 +596,8 @@ export const MapboxMap = observer(({ userStore }: MapProps): React.JSX.Element =
                 }
                 <div ref={mapContainer as LegacyRef<HTMLDivElement>} className="map-container mapboxgl-map" />
 
+
+                <Scenarios userStore={userStore} map={map} />
             </div>
         </div>
     );

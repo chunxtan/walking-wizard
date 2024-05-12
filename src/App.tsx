@@ -29,7 +29,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/datasets" element={<Datasets userStore={userStore} />} />
-          <Route path="/scenarios" element={<Scenarios userStore={userStore} />} />
+          {/* <Route path="/scenarios" element={<Scenarios userStore={userStore} />} /> */}
           <Route path="/login-signup" element={<LoginSignUp userStore={userStore} />} />
         </Routes>
       </main>

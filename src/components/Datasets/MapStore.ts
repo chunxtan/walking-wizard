@@ -12,6 +12,10 @@ export type DatasetLayer = {
     backendId: string
 }
 
+export type ScenarioLayer = {
+    scenarioId: string
+}
+
 export type UserCreatedDatasetLayer = {
     layerId: string,
     description: string,
@@ -35,6 +39,7 @@ interface PopupListener {
 
 export class MapStore {
     layers: DatasetLayer[];
+    scenarios: ScenarioLayer[];
     userCreatedBackendLayers: UserCreatedDatasetLayer[];
     layersReady: boolean;
     clickCoords: LngLat;
@@ -47,6 +52,7 @@ export class MapStore {
 
     constructor() {
         this.layers = [];
+        this.scenarios = [];
         this.userCreatedBackendLayers = [];
         this.layersReady = false;
         this.clickCoords = new LngLat(0, 0);
@@ -79,8 +85,13 @@ export class MapStore {
             markersLngLat: computed,
             deletedFeaturesId: computed,
             deletedFeaturesNum: computed,
-            deletedFeaturesGeoJson: computed
+            deletedFeaturesGeoJson: computed,
+            scenarioIds: computed
         })
+    }
+
+    addScenario(newScenario: ScenarioLayer) {
+        this.scenarios.push(newScenario);
     }
 
     addLayer(newLayer: DatasetLayer) {
@@ -97,6 +108,10 @@ export class MapStore {
 
     toggleLayersReady(val: boolean) {
         this.layersReady = val;
+    }
+
+    get scenarioIds() {
+        return this.scenarios.map((s) => s.scenarioId);
     }
 
     get editingLayers() {

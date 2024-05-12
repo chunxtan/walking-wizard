@@ -3,6 +3,7 @@ import { Button, Table } from "flowbite-react";
 import { SidebarMode } from "./Scenarios";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 import { atosRes_TEST04 } from "../../datasets/ATOS_RESULTS_TEST04";
+import { mapStore } from "../Datasets/MapStore";
 
 type ScenarioResultProps = {
     setSidebarMode: (mode: SidebarMode) => void,
@@ -89,6 +90,8 @@ export const ScenarioResult = ({ setSidebarMode, map }: ScenarioResultProps) : R
                 }
                 
             })
+
+            mapStore.addScenario({ scenarioId: id });
         }
     }
 
